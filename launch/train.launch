@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+
+<launch>
+  <arg name="world" default="track"/>
+  <arg name="gui" default="true"/>
+  
+  <include file="$(find hector_gazebo_worlds)/launch/start.launch">
+    <arg name="world" default="$(find uav_rl)/worlds/$(arg world).world"/>
+    <arg name="gui" default="$(arg gui)"/>
+  </include>
+
+  <arg name="x" default="0.0"/>
+  <arg name="y" default="0.0"/>
+  <arg name="z" default="0.3"/>
+  <arg name="use_ground_truth_for_tf" default="true"/>
+  <arg name="use_ground_truth_for_control" default="true"/>
+
+  <include file="$(find hector_quadrotor_gazebo)/launch/spawn_quadrotor_with_laser.launch">
+    <arg name="x" default="$(arg x)"/>
+    <arg name="y" default="$(arg y)"/>
+    <arg name="z" default="$(arg z)"/>
+    <arg name="use_ground_truth_for_tf" default="$(arg use_ground_truth_for_tf)"/>
+    <arg name="use_ground_truth_for_control" default="$(arg use_ground_truth_for_control)"/>
+  </include>
+</launch>
