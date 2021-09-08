@@ -21,14 +21,14 @@ class LFASARSALambda(RLAlgorithm):
         self.weights = np.random.random((self.feature_constructor.n_features,))
 
         self._logger.info('SARSA(lambda) with Linear Function Approximation:'
-                         'discount factor = {}, lambda = {},'
-                         'learning rate midpoint = {},'
-                         'learning rate steepness = {},'
-                         'initial learning rate = {}'.format(
-                             self.discount_factor, self.lambda_,
-                             self.learning_rate_midpoint,
-                             self.learning_rate_steepness,
-                             self.initial_learning_rate))
+                          'discount factor = {}, lambda = {},'
+                          'learning rate midpoint = {},'
+                          'learning rate steepness = {},'
+                          'initial learning rate = {}'.format(
+                              self.discount_factor, self.lambda_,
+                              self.learning_rate_midpoint,
+                              self.learning_rate_steepness,
+                              self.initial_learning_rate))
         self._logger.info(self.feature_constructor.info)
 
     def train(self, training_episodes):

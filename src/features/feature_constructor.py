@@ -1,11 +1,13 @@
 from abc import ABCMeta, abstractmethod, abstractproperty
+
+
 class FeatureConstructor:
     __metaclass__ = ABCMeta
 
     @abstractmethod
     def __init__(self):
         pass
-    
+
     @abstractmethod
     def get_features(self, state, action):
         pass
@@ -17,7 +19,7 @@ class FeatureConstructor:
     @abstractproperty
     def info(self):
         pass
-    
+
     @abstractproperty
     def n_features(self):
         pass

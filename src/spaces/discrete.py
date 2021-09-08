@@ -1,6 +1,7 @@
+import random
 import numpy as np
 
-from .space import Space
+from space import Space
 
 
 class Discrete(Space):
@@ -15,14 +16,11 @@ class Discrete(Space):
         super(Discrete, self).__init__((), np.int64)
 
     def sample(self):
-        return self.np_random.randint(self.n)
+        return random.randrange(self.n)
 
     def contains(self, x):
         if isinstance(x, int):
             as_int = x
-        elif isinstance(x, (np.generic, np.ndarray)) and (
-            x.dtype.char in np.typecodes['AllInteger'] and x.shape == ()):
-            as_int = int(x)
         else:
             return False
         return as_int >= 0 and as_int < self.n

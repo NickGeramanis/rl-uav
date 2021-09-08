@@ -32,7 +32,7 @@ def main():
     feature_constructor = TileCoding(
         env.action_space.n, n_tilings, tiles_per_dimension,
         env.observation_space, displacement_vector)
-    
+
     # RBF
     # rbf_standard_deviation = 0.25
     # centers_per_dimension = [

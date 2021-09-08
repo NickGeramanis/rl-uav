@@ -54,7 +54,7 @@ class NavigationEnv(Env):
         ((0, 0), (-9, 0)),
         ((-9, 0), (-9, -9))
     )
-    
+
     SPAWNABLE_AREA2 = (
         ((-0.2, -0.2), (-3.2, 3.1)),
         ((-0.2, -9.2), (3.1, 3.1)),
@@ -145,7 +145,7 @@ class NavigationEnv(Env):
                                  + angular_velocity_noise)
         else:
             e = ValueError('Invalid action '
-                           '{} ({})'.format(action, type(actions)))
+                           '{} ({})'.format(action, type(action)))
             rospy.logerr(e)
 
         self.cmd_vel_pub.publish(vel_msg)
@@ -202,7 +202,7 @@ class NavigationEnv(Env):
 
     def reset(self):
         self.reset_world()
-        rospy.sleep(WAIT_TIME)
+        rospy.sleep(self.WAIT_TIME)
 
         area = random.choice(self.SPAWNABLE_AREA)
         x = random.uniform(area[0][0], area[0][1])
@@ -210,11 +210,11 @@ class NavigationEnv(Env):
         yaw = random.uniform(-math.pi, math.pi)
 
         self.fly_to(0, 0, self.INIT_ALTITUDE, 0, 0, 0)
-        rospy.sleep(WAIT_TIME)
+        rospy.sleep(self.WAIT_TIME)
         self.fly_to(x, y, self.INIT_ALTITUDE, 0, 0, yaw)
-        rospy.sleep(WAIT_TIME)
+        rospy.sleep(self.WAIT_TIME)
         self.fly_to(x, y, self.FLYING_ALTITUDE, 0, 0, yaw)
-        rospy.sleep(WAIT_TIME)
+        rospy.sleep(self.WAIT_TIME)
 
         observation = [self.ranges[range_i] for range_i in self.MEASUREMENTS]
 
@@ -223,7 +223,7 @@ class NavigationEnv(Env):
     def step(self, action):
         if not self.action_space.contains(action):
             e = ValueError('Invalid action '
-                           '{} ({})'.format(action, type(actions)))
+                           '{} ({})'.format(action, type(action)))
             rospy.logerr(e)
 
         self.perform_action(action)
@@ -238,11 +238,11 @@ class NavigationEnv(Env):
         else:
             if action == self.FORWARD:
                 reward = self.FORWARD_REWARD
-            elif action = self.YAW_LEFT or action == self.YAW_RIGHT:
+            elif action == self.YAW_LEFT or action == self.YAW_RIGHT:
                 reward = self.YAW_REWARD
             else:
                 e = ValueError('Invalid action '
-                               '{} ({})'.format(action, type(actions)))
+                               '{} ({})'.format(action, type(action)))
                 rospy.logerr(e)
 
         return observation, reward, done, []

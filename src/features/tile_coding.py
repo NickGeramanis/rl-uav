@@ -16,7 +16,6 @@ class TileCoding(FeatureConstructor):
 
         self.create_tilings(observation_space, displacement_vector)
 
-
     def create_tilings(self, observation_space, displacement_vector,):
         tile_width = ((observation_space.high - observation_space.low)
                       / self.tiles_per_dimension)
@@ -74,12 +73,12 @@ class TileCoding(FeatureConstructor):
         features = np.zeros((self.n_features,))
         features[action * self.n_tiles + active_features] = 1
         return features
-    
+
     @property
     def info(self):
         return ('Tile Coding: tilings = {}, tiles per dimension = {}'
                 .format(self.n_tilings, self.tiles_per_dimension))
-    
+
     @property
     def n_features(self):
         return self.n_tiles * self.n_actions

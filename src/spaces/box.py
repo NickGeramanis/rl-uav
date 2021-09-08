@@ -117,12 +117,6 @@ class Box(Space):
         return x.shape == self.shape and np.all(x >= self.low) and (
             np.all(x <= self.high))
 
-    def to_jsonable(self, sample_n):
-        return np.array(sample_n).tolist()
-
-    def from_jsonable(self, sample_n):
-        return [np.asarray(sample) for sample in sample_n]
-
     def __repr__(self):
         return 'Box({}, {}, {},{})'.format(
             self.low.min(), self.high.max(), self.shape, self.dtype)

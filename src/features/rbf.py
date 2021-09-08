@@ -17,7 +17,6 @@ class RBF(FeatureConstructor):
         self.rbf_variance = 2 * self.rbf_standard_deviation ** 2
         self.n_functions = self.rbf_centers.shape[0] + 1
 
-
     def calculate_q(self, weights, state):
         q = np.empty((self.n_actions,))
         for action in range(self.n_actions):
@@ -40,13 +39,13 @@ class RBF(FeatureConstructor):
     def normalize(self, value):
         return ((value - self.observation_space.low)
                 / (self.observation_space.high - self.observation_space.low))
-    
+
     @property
     def info(self):
         return ('Radial Basis Function: centers per dimension={},'
-                     'standard deviation = {}').format(
+                'standard deviation = {}').format(
             self.centers_per_dimension, self.rbf_standard_deviation)
-    
+
     @property
     def n_features(self):
         return self.n_functions * self.n_actions
