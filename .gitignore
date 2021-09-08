@@ -1,4 +1,7 @@
+**/__pycache__
+**/.pytests_cache
 *.log
 *.npy
 *.pyc
-**/__pycache__
+.coverage
+/coverage-reports
