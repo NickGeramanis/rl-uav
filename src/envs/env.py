@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 
 
-class Env:
+class Env(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod

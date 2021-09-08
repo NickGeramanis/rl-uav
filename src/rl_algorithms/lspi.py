@@ -50,7 +50,7 @@ class LSPI(RLAlgorithm):
         return features_list
 
     def lstdq(self, features_list, delta):
-        A = delta * np.identity(self.feature_constructor.n_features)
+        a = delta * np.identity(self.feature_constructor.n_features)
         b = np.zeros((self.feature_constructor.n_features,))
         sample_i = 0
 
@@ -77,21 +77,21 @@ class LSPI(RLAlgorithm):
                 current_features = self.feature_constructor.get_features(
                     current_state, action)
 
-            A += np.outer(
+            a += np.outer(
                 current_features,
                 (current_features - self.discount_factor * next_features))
             b += current_features * reward
 
-        rank = np.linalg.matrix_rank(A)
+        rank = np.linalg.matrix_rank(a)
         if rank == self.feature_constructor.n_features:
-            A_inverse = np.linalg.inv(A)
+            a_inverse = np.linalg.inv(a)
         else:
             self._logger.warning("A is not full rank (rank={})".format(rank))
-            u, s, vh = np.linalg.svd(A)
+            u, s, vh = np.linalg.svd(a)
             s = np.diag(s)
-            A_inverse = np.matmul(np.matmul(vh.T, np.linalg.pinv(s)), u.T)
+            a_inverse = np.matmul(np.matmul(vh.T, np.linalg.pinv(s)), u.T)
 
-        return np.matmul(A_inverse, b)
+        return np.matmul(a_inverse, b)
 
     def train(self, training_episodes, tolerance=0, delta=0,
               pre_calculate_features=False):

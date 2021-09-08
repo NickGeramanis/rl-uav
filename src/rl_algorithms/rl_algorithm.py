@@ -2,7 +2,7 @@ from abc import ABCMeta, abstractmethod
 import logging
 
 
-class RLAlgorithm:
+class RLAlgorithm(object):
     __metaclass__ = ABCMeta
 
     def __init__(self):

@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod, abstractproperty
 
 
-class FeatureConstructor:
+class FeatureConstructor(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod

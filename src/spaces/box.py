@@ -1,6 +1,6 @@
 import numpy as np
 
-from .space import Space
+from space import Space
 
 
 class Box(Space):

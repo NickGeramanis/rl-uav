@@ -4,17 +4,14 @@ import random
 
 import numpy as np
 import rospy
-import std_srvs
-from gazebo_msgs.srv import *
-from geometry_msgs.msg import *
-from hector_uav_msgs.msg import *
-from hector_uav_msgs.srv import *
-from sensor_msgs.msg import *
-from spaces.box import Box
-from spaces.discrete import Discrete
-from std_msgs.msg import *
-from std_srvs.srv import *
-from tf.transformations import euler_from_quaternion, quaternion_from_euler
+from std_srvs.srv import Empty
+from geometry_msgs.msg import Twist, Point, Pose, PoseStamped, Quaternion
+from hector_uav_msgs.srv import EnableMotors
+from sensor_msgs.msg import LaserScan
+from src.spaces.box import Box
+from src.spaces.discrete import Discrete
+from std_msgs.msg import Header
+from tf.transformations import quaternion_from_euler
 from env import Env
 
 
@@ -46,7 +43,7 @@ class NavigationEnv(Env):
 
     N_OBSERVATIONS = len(MEASUREMENTS)
 
-    SPAWNABLE_AREA1 = (
+    TRACK1_SPAWNABLE_AREA = (
         ((-9, -9), (-9, 9)),
         ((-9, 9), (9, 9)),
         ((9, 9), (0, 9)),
@@ -55,7 +52,7 @@ class NavigationEnv(Env):
         ((-9, 0), (-9, -9))
     )
 
-    SPAWNABLE_AREA2 = (
+    TRACK2_SPAWNABLE_AREA = (
         ((-0.2, -0.2), (-3.2, 3.1)),
         ((-0.2, -9.2), (3.1, 3.1)),
         ((-9.2, -9.2), (3.1, 12.4)),
@@ -70,7 +67,7 @@ class NavigationEnv(Env):
         ((-9.2, -0.2), (-3.2, -3.2))
     )
 
-    SPAWNABLE_AREA3 = (
+    TRACK3_SPAWNABLE_AREA = (
         ((-4.7, 4.6), (-9.3, -9.3)),
         ((4.6, 4.6), (-9.3, -15.3)),
         ((4.6, 13.8), (-15.2, -15.2)),
@@ -88,11 +85,11 @@ class NavigationEnv(Env):
 
     def __init__(self, track_id=1):
         if track_id == 1:
-            self.spawnable_area = self.SPAWNABLE_AREA1
+            self.spawnable_area = self.TRACK1_SPAWNABLE_AREA
         elif track_id == 2:
-            self.spawnable_area = self.SPAWNABLE_AREA2
+            self.spawnable_area = self.TRACK2_SPAWNABLE_AREA
         elif track_id == 3:
-            self.spawnable_area = self.SPAWNABLE_AREA3
+            self.spawnable_area = self.TRACK3_SPAWNABLE_AREA
         else:
             e = ValueError('Invalid track id '
                            '{} ({})'.format(track_id, type(track_id)))
@@ -194,8 +191,7 @@ class NavigationEnv(Env):
     def reset_world(self):
         rospy.wait_for_service('gazebo/reset_world')
         try:
-            reset_env = rospy.ServiceProxy(
-                'gazebo/reset_world', std_srvs.srv.Empty)
+            reset_env = rospy.ServiceProxy('gazebo/reset_world', Empty)
             reset_env()
         except rospy.ServiceException as e:
             rospy.logerr(e)
@@ -204,7 +200,7 @@ class NavigationEnv(Env):
         self.reset_world()
         rospy.sleep(self.WAIT_TIME)
 
-        area = random.choice(self.SPAWNABLE_AREA)
+        area = random.choice(self.spawnable_area)
         x = random.uniform(area[0][0], area[0][1])
         y = random.uniform(area[1][0], area[1][1])
         yaw = random.uniform(-math.pi, math.pi)
@@ -248,4 +244,5 @@ class NavigationEnv(Env):
         return observation, reward, done, []
 
     def render(self):
+        # Rendering is handled by Gazebo
         pass

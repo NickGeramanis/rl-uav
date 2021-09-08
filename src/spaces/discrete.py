@@ -5,7 +5,7 @@ from space import Space
 
 
 class Discrete(Space):
-    """A discrete space in math{ 0, 1, ..., n-1}. 
+    """A discrete space in math{ 0, 1, ..., n-1}.
     Example::
         >>> Discrete(2)
     """
@@ -20,6 +20,7 @@ class Discrete(Space):
 
     def contains(self, x):
         if isinstance(x, int):
+            # Promote list to array for contains check
             as_int = x
         else:
             return False
