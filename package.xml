@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>uav_rl</name>
-  <version>1.0.0</version>
+  <version>0.1.0</version>
   <description>A package that implements different reinforcement learning algorithms to solve the navigation problem of an unmanned aerial vehicle (UAV)</description>
   <maintainer email="nickgeramanis@gmail.com">Nikolaos Geramanis</maintainer>
   <license>GPLv3</license>

@@ -19,3 +19,7 @@ class Env(object):
     @abstractmethod
     def render(self):
         pass
+
+    @abstractmethod
+    def close(self):
+        pass

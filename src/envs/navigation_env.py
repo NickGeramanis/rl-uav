@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import math
-import random
+from random import gauss, choice, uniform
 
 import numpy as np
 import rospy
@@ -35,15 +35,13 @@ class NavigationEnv(Env):
     WALL_DISTANCE_THRESHOLD = 0.4  # m
     INIT_ALTITUDE = 4  # m
 
-    MAX_ACTIONS = 500
-
-    VELOCITY_STANDARD_DEVIATION = 0.01  # m/s
+    VELOCITY_STANDARD_DEVIATION = 0.01
 
     MEASUREMENTS = (180, 360, 540, 720, 900)
 
     N_OBSERVATIONS = len(MEASUREMENTS)
 
-    TRACK1_SPAWNABLE_AREA = (
+    SPAWN_AREA1 = (
         ((-9, -9), (-9, 9)),
         ((-9, 9), (9, 9)),
         ((9, 9), (0, 9)),
@@ -52,7 +50,7 @@ class NavigationEnv(Env):
         ((-9, 0), (-9, -9))
     )
 
-    TRACK2_SPAWNABLE_AREA = (
+    SPAWN_AREA2 = (
         ((-0.2, -0.2), (-3.2, 3.1)),
         ((-0.2, -9.2), (3.1, 3.1)),
         ((-9.2, -9.2), (3.1, 12.4)),
@@ -67,7 +65,7 @@ class NavigationEnv(Env):
         ((-9.2, -0.2), (-3.2, -3.2))
     )
 
-    TRACK3_SPAWNABLE_AREA = (
+    SPAWN_AREA3 = (
         ((-4.7, 4.6), (-9.3, -9.3)),
         ((4.6, 4.6), (-9.3, -15.3)),
         ((4.6, 13.8), (-15.2, -15.2)),
@@ -83,13 +81,11 @@ class NavigationEnv(Env):
         ((-4.7, -4.7), (-15.2, -9.3))
     )
 
+    SPAWN_AREAS = (SPAWN_AREA1, SPAWN_AREA2, SPAWN_AREA3)
+
     def __init__(self, track_id=1):
-        if track_id == 1:
-            self.spawnable_area = self.TRACK1_SPAWNABLE_AREA
-        elif track_id == 2:
-            self.spawnable_area = self.TRACK2_SPAWNABLE_AREA
-        elif track_id == 3:
-            self.spawnable_area = self.TRACK3_SPAWNABLE_AREA
+        if track_id in range(1, len(self.SPAWN_AREAS) + 1):
+            self.spawn_area = self.SPAWN_AREAS[track_id - 1]
         else:
             e = ValueError('Invalid track id '
                            '{} ({})'.format(track_id, type(track_id)))
@@ -123,23 +119,17 @@ class NavigationEnv(Env):
     def perform_action(self, action):
         vel_msg = Twist()
 
-        linear_velocity_noise = random.gauss(
-            0, self.VELOCITY_STANDARD_DEVIATION)
-        angular_velocity_noise = random.gauss(
-            0, self.VELOCITY_STANDARD_DEVIATION)
+        vel_msg.linear.x = gauss(0, self.VELOCITY_STANDARD_DEVIATION)
+        vel_msg.angular.z = gauss(0, self.VELOCITY_STANDARD_DEVIATION)
 
         if action == self.FORWARD:
-            vel_msg.linear.x = (self.FORWARD_LINEAR_VELOCITY
-                                + linear_velocity_noise)
-            vel_msg.angular.z = angular_velocity_noise
+            vel_msg.linear.x += self.FORWARD_LINEAR_VELOCITY
         elif action == self.YAW_RIGHT:
-            vel_msg.linear.x = self.YAW_LINEAR_VELOCITY + linear_velocity_noise
-            vel_msg.angular.z = (self.YAW_ANGULAR_VELOCITY
-                                 + angular_velocity_noise)
+            vel_msg.linear.x += self.YAW_LINEAR_VELOCITY
+            vel_msg.angular.z += self.YAW_ANGULAR_VELOCITY
         elif action == self.YAW_LEFT:
-            vel_msg.linear.x = self.YAW_LINEAR_VELOCITY + linear_velocity_noise
-            vel_msg.angular.z = (-self.YAW_ANGULAR_VELOCITY
-                                 + angular_velocity_noise)
+            vel_msg.linear.x += self.YAW_LINEAR_VELOCITY
+            vel_msg.angular.z -= self.YAW_ANGULAR_VELOCITY
         else:
             e = ValueError('Invalid action '
                            '{} ({})'.format(action, type(action)))
@@ -186,7 +176,7 @@ class NavigationEnv(Env):
         if self.ranges is None:
             return False
 
-        return np.any(self.ranges < self.WALL_DISTANCE_THRESHOLD)
+        return (self.ranges < self.WALL_DISTANCE_THRESHOLD).any()
 
     def reset_world(self):
         rospy.wait_for_service('gazebo/reset_world')
@@ -200,10 +190,10 @@ class NavigationEnv(Env):
         self.reset_world()
         rospy.sleep(self.WAIT_TIME)
 
-        area = random.choice(self.spawnable_area)
-        x = random.uniform(area[0][0], area[0][1])
-        y = random.uniform(area[1][0], area[1][1])
-        yaw = random.uniform(-math.pi, math.pi)
+        area = choice(self.spawn_area)
+        x = uniform(area[0][0], area[0][1])
+        y = uniform(area[1][0], area[1][1])
+        yaw = uniform(-math.pi, math.pi)
 
         self.fly_to(0, 0, self.INIT_ALTITUDE, 0, 0, 0)
         rospy.sleep(self.WAIT_TIME)
@@ -212,7 +202,7 @@ class NavigationEnv(Env):
         self.fly_to(x, y, self.FLYING_ALTITUDE, 0, 0, yaw)
         rospy.sleep(self.WAIT_TIME)
 
-        observation = [self.ranges[range_i] for range_i in self.MEASUREMENTS]
+        observation = [self.ranges[i] for i in self.MEASUREMENTS]
 
         return observation
 
@@ -225,24 +215,24 @@ class NavigationEnv(Env):
         self.perform_action(action)
         rospy.sleep(self.STEP_DURATION)
 
-        observation = [self.ranges[range_i] for range_i in self.MEASUREMENTS]
+        observation = [self.ranges[i] for i in self.MEASUREMENTS]
 
         done = self.collision_occured()
+        reward = 0
 
         if done:
             reward = self.COLLISION_REWARD
-        else:
-            if action == self.FORWARD:
-                reward = self.FORWARD_REWARD
-            elif action == self.YAW_LEFT or action == self.YAW_RIGHT:
-                reward = self.YAW_REWARD
-            else:
-                e = ValueError('Invalid action '
-                               '{} ({})'.format(action, type(action)))
-                rospy.logerr(e)
+        elif action == self.FORWARD:
+            reward = self.FORWARD_REWARD
+        elif action == self.YAW_LEFT or action == self.YAW_RIGHT:
+            reward = self.YAW_REWARD
 
         return observation, reward, done, []
 
     def render(self):
         # Rendering is handled by Gazebo
+        pass
+
+    def close(self):
+        # No need to do something on close
         pass
