@@ -1,120 +1,64 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>
-      Reinforcement Learning for Autonomous Unmanned Aerial Vehicles -
-      Undergraduate Thesis
-    </title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-      }
-      .sidenav {
-        height: 100%;
-        width: 300px;
-        position: fixed;
-        z-index: 1;
-        top: 0;
-        left: 0;
-        background-color: orangered;
-        overflow: auto;
-      }
-      .sidenav a {
-        padding: 8px;
-        text-decoration: none;
-        font-size: 20px;
-        font-weight: bold;
-        color: white;
-        display: block;
-        margin: 16px;
-      }
-      .sidenav a:hover {
-        color: black;
-        background: white;
-      }
-      .main {
-        margin: 16px 16px 16px 350px;
-      }
-      .main h1 {
-        font-size: 40px;
-      }
-      .main h2 {
-        font-size: 22px;
-      }
-      .main h3 {
-        font-size: 32px;
-        color: orangered;
-      }
-      .main h4 {
-        font-size: 20px;
-      }
-      .main p {
-        font-size: 18px;
-      }
-      .main a {
-        font-size: 18px;
-      }
-      .main ul {
-        font-size: 18px;
-      }
-      .main img {
-        font-size: 18px;
-      }
-    </style>
-  </head>
-
-  <body>
-    <div class="sidenav">
-      <a href="#home">Home</a>
-      <a href="#description">Description</a>
-      <a href="#gettingStarted">Getting Started</a>
-      <a href="#usage">Usage</a>
-      <a href="#about">About</a>
-    </div>
-    <div class="main">
-      <h1 id="home">
         Reinforcement Learning for Autonomous Unmanned Aerial Vehicles -
         Undergraduate Thesis
-      </h1>
-      <a href="https://github.com/NickGeramanis/undergrad-thesis-rl-uav">
-        <img
-          src="images/github.png"
-          alt="GitHub image"
-          style="width: 15%; height: 15%"
-        />
-      </a>
-      <h2>
+    </title>
+    <link href="style.css" rel="stylesheet">
+</head>
+
+<body>
+<div class="sidenav">
+    <a href="#home">Home</a>
+    <a href="#description">Description</a>
+    <a href="#gettingStarted">Getting Started</a>
+    <a href="#usage">Usage</a>
+    <a href="#about">About</a>
+</div>
+<div class="main">
+    <h1 id="home">
+        Reinforcement Learning for Autonomous Unmanned Aerial Vehicles -
+        Undergraduate Thesis
+    </h1>
+    <a href="https://github.com/NickGeramanis/undergrad-thesis-rl-uav">
+        <img src="images/github.png" alt="GitHub image"
+             style="width: 15%; height: 15%"/>
+    </a>
+    <h2>
         Implementation of different reinforcement learning algorithms to solve
         the navigation problem of an unmanned aerial vehicle (UAV) using
-        ROS/Gazebo and Python.
-      </h2>
-      <h3 id="description">Description</h3>
-      <p>
-        "navigation_env.py": The goal of this environment is to navigate a robot
-        on a track without crashing into the walls. Initially, the robot is
-        placed randomly into the track but at a safe distance from the walls.
-        The state-space consists of 5 range measurements. The action-space
-        consist of 3 action (move_forward, rotate_left, rotate_right).
-        Furthermore, both actions and states have additive white Gaussian noise.
-        The robot is rewarded +5 for moving forward and -0.5 for rotating. If
-        the robot crashes into the wall it is penalized with -200.
-      </p>
-      <p>There are 3 available worlds/tracks:</p>
-      <p>Track1:</p>
-      <img src="images/track1.png" alt="Track1" />
-      <p>Track2:</p>
-      <img src="images/track2.png" alt="Track2" />
-      <p>Track3:</p>
-      <img src="images/track3.png" alt="Track3" />
-      <p>
+        <a href="https://www.ros.org/">ROS</a>/<a href="http://gazebosim.org/">Gazebo</a> and Python.
+    </h2>
+    <h3 id="description">Description</h3>
+    <p>
+        <quote>navigation_env.py</quote>
+        : The goal of this environment is to navigate a
+        robot on a track without crashing into the walls. Initially, the robot
+        is placed randomly into the track but at a safe distance from the
+        walls. The state-space consists of 5 range measurements. The
+        action-space consist of 3 actions (move_forward, rotate_left,
+        rotate_right). Furthermore, both actions and states have additive white
+        Gaussian noise. The robot is rewarded +5 for moving forward and -0.5
+        for rotating. If the robot crashes into the wall it is penalized with
+        -200.
+    </p>
+    <p>There are 3 available worlds/tracks:</p>
+    <p>Track1:</p>
+    <img src="images/track1.png" alt="Track1"/>
+    <p>Track2:</p>
+    <img src="images/track2.png" alt="Track2"/>
+    <p>Track3:</p>
+    <img src="images/track3.png" alt="Track3"/>
+    <p>
         This project has been structured based on
         <a href="https://github.com/openai/gym">OpenAI Gym</a> framework.
-      </p>
-      <h4>Abstract</h4>
-      <p>
-        Reinforcement learning is an area of machine learning concerned with how
-        autonomous agents learn to behave in unknown environments through
+    </p>
+    <h4>Abstract</h4>
+    <p>
+        Reinforcement learning is an area of machine learning concerned with
+        how autonomous agents learn to behave in unknown environments through
         trial-and-error. The goal of a reinforcement learning agent is to learn
         a sequential decision policy that maximizes the notion of cumulative
         reward through continuous interaction with the unknown environment. A
@@ -122,76 +66,95 @@
         Unmanned Aerial Vehicle (UAV) in worlds with no available map. This
         ability is critical in many applications, such as search and rescue
         operations or the mapping of geographical areas. In this thesis, we
-        present a map-less approach for the autonomous, safe navigation of a UAV
-        in unknown environments using reinforcement learning. Specifically, we
-        implemented two popular algorithms, SARSA(λ) and Least-Squares Policy
-        Iteration (LSPI), and combined them with tile coding, a parametric,
-        linear approximation architecture for value function in order to deal
-        with the 5- or 3-dimensional continuous state space defined by the
-        measurements of the UAV distance sensors. The final policy of each
-        algorithm, learned over only 500 episodes, was tested in unknown
-        environments more complex than the one used for training in order to
-        evaluate the behavior of each policy. Results show that SARSA(λ) was
-        able to learn a near-optimal policy that performed adequately even in
-        unknown situations, leading the UAV along paths free-of-collisions with
-        obstacles. LSPI's policy required less learning time and its performance
-        was promising, but not as effective, as it occasionally leads to
-        collisions in unknown situations. The whole project was implemented
-        using the Robot Operating System (ROS) framework and the Gazebo robot
-        simulation environment.
-      </p>
-      <p>Supervisor: Associate Professor Michail G. Lagoudakis</p>
-      <a href=https://doi.org/10.26233/heallink.tuc.87066>https://doi.org/10.26233/heallink.tuc.87066</a>
-      <h3 id="gettingStarted">Getting Started</h3>
-      <h4>Prerequisites</h4>
-      <p>This package has only been tested in ROS Kinetic (Ubuntu 16.04) - Python 2.7.</p>
-      <p>Required ROS packages:</p>
-      <ul>
+        present a map-less approach for the autonomous, safe navigation of a
+        UAV in unknown environments using reinforcement learning. Specifically,
+        we implemented two popular algorithms, SARSA(λ) and Least-Squares
+        Policy Iteration (LSPI), and combined them with tile coding, a
+        parametric, linear approximation architecture for value function in
+        order to deal with the 5- or 3-dimensional continuous state space
+        defined by the measurements of the UAV distance sensors. The final
+        policy of each algorithm, learned over only 500 episodes, was tested in
+        unknown environments more complex than the one used for training in
+        order to evaluate the behavior of each policy. Results show that
+        SARSA(λ) was able to learn a near-optimal policy that performed
+        adequately even in unknown situations, leading the UAV along paths
+        free-of-collisions with obstacles. LSPI's policy required less learning
+        time and its performance was promising, but not as effective, as it
+        occasionally leads to collisions in unknown situations. The whole
+        project was implemented using the Robot Operating System (ROS)
+        framework and the Gazebo robot simulation environment.
+    </p>
+    <p>Supervisor: Associate Professor Michail G. Lagoudakis</p>
+    <a href=https://doi.org/10.26233/heallink.tuc.87066>https://doi.org/10.26233/heallink.tuc.87066</a>
+    <h3 id="gettingStarted">Getting Started</h3>
+    <h4>Prerequisites</h4>
+    <p>
+        This package has only been tested in ROS Kinetic (Ubuntu 16.04) -
+        Python
+        2.7.
+    </p>
+    <p>Required ROS packages:</p>
+    <ul>
         <li>hector_quadrotor</li>
         <li>hector_slam</li>
         <li>hector_localization</li>
         <li>hector_gazebo</li>
         <li>hector_models</li>
         <li>gazebo-ros-pkgs</li>
-      </ul>
-      <p>It is recommended that you build the above packages from source (clone the corresponding git repositories)</p>
-      <p>Required Python libraries:</p>
-      <ul>
+    </ul>
+    <p>
+        It is recommended that you build the above packages from source (clone
+        the corresponding git repositories)
+    </p>
+    <p>Required Python libraries:</p>
+    <ul>
         <li>NumPy</li>
-      </ul>
-      <h4>Installation</h4>
-      <p>Clone the repository into your catkin workspace:</p>
-      <p>
+    </ul>
+    <h4>Installation</h4>
+    <p>Clone the repository into your catkin workspace:</p>
+    <code>
         cd ~/catkin_ws/src<br>
         clone https://github.com/NickGeramanis/undergrad-thesis-rl-uav.git
-      </p>
-      <p>Build your catkin workspace:</p>
-      <p>
+    </code>
+    <p>Build your catkin workspace:</p>
+    <code>
         cd ~/catkin_ws <br>
         catkin_make
-      </p>
-      <p>Do not forget to source the new "setup.*sh" file:</p>
-      <p>
+    </code>
+    <p>
+        Do not forget to source the new 
+        <quote>setup.*sh</quote> 
+        file:
+    </p>
+    <code>
         cd ~/catkin_ws <br>
         source devel/setup.bash
-      </p>
-      <h3 id="usage">Usage</h3>
-      <p>In order to launch a new world you must start the "train.launch" file:</p>
-      <p>roslaunch uav_rl train.launch world:=track1 gui:=true</p>
-      <p>After the world has started, run the "train_uav" node ("train_uav.py") to begin the training process and test different algorithms:</p>
-      <p>rosrun uav_rl train_uav.py</p>
-      <h3 id="about">About</h3>
-      <h4>Status</h4>
-      <p>Under maintenance.</p>
-      <h4>License</h4>
-      <p>
-        Distributed under the GPL-3.0 License. See "LICENSE" for more
-        information.
-      </p>
-      <h4>Authors</h4>
-      <a href="https://www.linkedin.com/in/nikolaos-geramanis"
-        >Nick Geramanis</a
-      >
-    </div>
-  </body>
+    </code>
+    <h3 id="usage">Usage</h3>
+    <p>In order to launch a new world you must start the
+        <quote>train.launch</quote>
+        file:
+    </p>
+    <code>roslaunch uav_rl train.launch world:=track1 gui:=true</code>
+    <p>
+        After the world has started, run the
+        <quote>train_uav</quote>
+        node (
+        <quote>train_uav.py</quote>
+        ) to begin the training process and test different algorithms:
+    </p>
+    <code>rosrun uav_rl train_uav.py</code>
+    <h3 id="about">About</h3>
+    <h4>Status</h4>
+    <p>Under maintenance.</p>
+    <h4>License</h4>
+    <p>
+        Distributed under the GPL-3.0 License. See 
+        <quote>LICENSE</quote>
+        for more information.
+    </p>
+    <h4>Authors</h4>
+    <a href="https://www.linkedin.com/in/nikolaos-geramanis">Nick Geramanis</a>
+</div>
+</body>
 </html>
