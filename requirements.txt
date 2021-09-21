@@ -1,3 +1,7 @@
 numpy
-pytest
 coverage
+pylint
+mypy
+pycodestyle
+autopep8
+isort
