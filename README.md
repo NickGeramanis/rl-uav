@@ -83,7 +83,6 @@ This package has only been tested in ROS Kinetic (Ubuntu 16.04) - Python 2.7.
 Required ROS packages:
 
 - hector_quadrotor
-- hector_slam
 - hector_localization
 - hector_gazebo
 - hector_models

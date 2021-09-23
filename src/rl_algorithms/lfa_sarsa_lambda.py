@@ -1,47 +1,46 @@
 import math
 import random
+
 import numpy as np
-from rl_algorithm import RLAlgorithm
+
+from src.rl_algorithms.rl_algorithm import RLAlgorithm
 
 
 class LFASARSALambda(RLAlgorithm):
+    __env = None
+    __discount_factor = None
+    __initial_learning_rate = None
+    __learning_rate_midpoint = None
+    __learning_rate_steepness = None
+    __feature_constructor = None
+    __lambda = None
+    __weights = None
 
-    def __init__(self, env, learning_rate_midpoint, discount_factor,
-                 initial_learning_rate, learning_rate_steepness,
+    def __init__(self, env, discount_factor, initial_learning_rate,
+                 learning_rate_midpoint, learning_rate_steepness,
                  feature_constructor, lambda_):
-        RLAlgorithm.__init__(self)
-        self.env = env
-        self.lambda_ = lambda_
-        self.discount_factor = discount_factor
-        self.initial_learning_rate = initial_learning_rate
-        self.learning_rate_midpoint = learning_rate_midpoint
-        self.learning_rate_steepness = learning_rate_steepness
-        self.sample_set = []
-        self.feature_constructor = feature_constructor
-        self.weights = np.random.random((self.feature_constructor.n_features,))
+        super(LFASARSALambda, self).__init__('info.log')
+        self.__env = env
+        self.__discount_factor = discount_factor
+        self.__initial_learning_rate = initial_learning_rate
+        self.__learning_rate_midpoint = learning_rate_midpoint
+        self.__learning_rate_steepness = learning_rate_steepness
+        self.__feature_constructor = feature_constructor
+        self.__lambda = lambda_
+        self.__weights = np.random.random((feature_constructor.n_features,))
 
-        self._logger.info('SARSA(lambda) with Linear Function Approximation:'
-                          'discount factor = {}, lambda = {},'
-                          'learning rate midpoint = {},'
-                          'learning rate steepness = {},'
-                          'initial learning rate = {}'.format(
-                              self.discount_factor, self.lambda_,
-                              self.learning_rate_midpoint,
-                              self.learning_rate_steepness,
-                              self.initial_learning_rate))
-        self._logger.info(self.feature_constructor.info)
+        self._logger.info(self)
 
-    def train(self, training_episodes):
-        for episode_i in range(training_episodes):
+    def train(self, n_episodes):
+        for episode_i in range(n_episodes):
             episode_reward = 0.0
             episode_actions = 0
 
             try:
-                learning_rate = (
-                    self.initial_learning_rate
-                    / (1 + math.exp(
-                        self.learning_rate_steepness
-                        * (episode_i - self.learning_rate_midpoint))))
+                exponent = (self.__learning_rate_steepness
+                            * (episode_i - self.__learning_rate_midpoint))
+                learning_rate = (self.__initial_learning_rate
+                                 / (1 + math.exp(exponent)))
             except OverflowError:
                 learning_rate = 0
 
@@ -51,70 +50,82 @@ class LFASARSALambda(RLAlgorithm):
                 epsilon = 0
 
             done = False
-            current_state = self.env.reset()
+            current_state = self.__env.reset()
             eligibility_traces = np.zeros(
-                (self.feature_constructor.n_features,))
-            current_q_values = self.feature_constructor.calculate_q(
-                self.weights, current_state)
+                (self.__feature_constructor.n_features,))
+            current_q = self.__feature_constructor.calculate_q(self.__weights,
+                                                               current_state)
 
             if random.random() <= epsilon:
-                current_action = self.env.action_space.sample()
+                current_action = self.__env.action_space.sample()
             else:
-                current_action = np.argmax(current_q_values)
+                current_action = np.argmax(current_q)
 
             while not done:
-                next_state, reward, done, _ = self.env.step(current_action)
-                self.sample_set.append((
-                    current_state, current_action, reward, next_state, done))
+                next_state, reward, done, _ = self.__env.step(current_action)
                 episode_reward += reward
                 episode_actions += 1
 
-                next_q_values = self.feature_constructor.calculate_q(
-                    self.weights, next_state)
+                next_q = self.__feature_constructor.calculate_q(self.__weights,
+                                                                next_state)
 
                 if random.random() <= epsilon:
-                    next_action = self.env.action_space.sample()
+                    next_action = self.__env.action_space.sample()
                 else:
-                    next_action = np.argmax(next_q_values)
+                    next_action = np.argmax(next_q)
 
-                if done:
-                    td_target = reward
-                else:
-                    td_target = (reward + self.discount_factor
-                                 * next_q_values[next_action])
-                td_error = td_target - current_q_values[current_action]
+                td_target = reward
+                if not done:
+                    td_target += self.__discount_factor * next_q[next_action]
 
-                eligibility_traces = (self.discount_factor * self.lambda_
+                td_error = td_target - current_q[current_action]
+
+                current_features = self.__feature_constructor.get_features(
+                    current_state, current_action)
+                eligibility_traces = (self.__discount_factor
+                                      * self.__lambda
                                       * eligibility_traces
-                                      + self.feature_constructor.get_features(
-                                          current_state, current_action))
+                                      + current_features)
 
-                self.weights += learning_rate * td_error * eligibility_traces
+                self.__weights += (learning_rate
+                                   * td_error
+                                   * eligibility_traces)
 
                 current_state = next_state
                 current_action = next_action
-                current_q_values = next_q_values
+                current_q = next_q
 
-            self._logger.info('episode={}|reward={}|actions={}'.format(
-                episode_i, episode_reward, episode_actions))
+            self._logger.info('episode=%d|reward=%f|actions=%d',
+                              episode_i, episode_reward, episode_actions)
 
-    def run(self, episodes, render=False):
-        for episode_i in range(episodes):
+    def run(self, n_episodes, render=False):
+        for episode_i in range(n_episodes):
             episode_reward = 0.0
             episode_actions = 0
-            state = self.env.reset()
+            state = self.__env.reset()
             done = False
 
             while not done:
                 if render:
-                    self.env.render()
+                    self.__env.render()
 
-                action = np.argmax(
-                    self.feature_constructor.calculate_q(self.weights, state))
-
-                state, reward, done, _ = self.env.step(action)
+                q = self.__feature_constructor.calculate_q(self.__weights,
+                                                           state)
+                action = np.argmax(q)
+                state, reward, done, _ = self.__env.step(action)
                 episode_reward += reward
                 episode_actions += 1
 
-            self._logger.info('episode={}|reward={}|actions={}'.format(
-                episode_i, episode_reward, episode_actions))
+            self._logger.info('episode=%d|reward=%f|actions=%d',
+                              episode_i, episode_reward, episode_actions)
+
+    def __str__(self):
+        return ('SARSA(lambda) with Linear Function Approximation:'
+                'discount factor={}|initial learning rate = {}|'
+                'learning rate midpoint = {}|learning rate steepness = {}|'
+                'lambda = {}|{}').format(self.__discount_factor,
+                                         self.__initial_learning_rate,
+                                         self.__learning_rate_midpoint,
+                                         self.__learning_rate_steepness,
+                                         self.__lambda,
+                                         self.__feature_constructor)

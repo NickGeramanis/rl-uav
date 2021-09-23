@@ -1,12 +1,8 @@
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta, abstractmethod, abstractproperty
 
 
-class Env(object):
+class Env:
     __metaclass__ = ABCMeta
-
-    @abstractmethod
-    def __init__(self):
-        pass
 
     @abstractmethod
     def step(self, action):
@@ -22,4 +18,16 @@ class Env(object):
 
     @abstractmethod
     def close(self):
+        pass
+
+    @abstractmethod
+    def seed(self):
+        pass
+
+    @abstractproperty
+    def action_space(self):
+        pass
+
+    @abstractproperty
+    def observation_space(self):
         pass

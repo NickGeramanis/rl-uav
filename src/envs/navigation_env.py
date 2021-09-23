@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import math
-from random import gauss, choice, uniform
+import random
 
 import numpy as np
 import rospy
@@ -11,37 +11,37 @@ from sensor_msgs.msg import LaserScan
 from src.spaces.box import Box
 from src.spaces.discrete import Discrete
 from std_msgs.msg import Header
-from tf.transformations import quaternion_from_euler
+import tf
 from env import Env
 
 
 class NavigationEnv(Env):
-    N_ACTIONS = 3
-    FORWARD = 0
-    YAW_RIGHT = 1
-    YAW_LEFT = 2
+    __N_ACTIONS = 3
+    __FORWARD = 0
+    __YAW_RIGHT = 1
+    __YAW_LEFT = 2
 
-    WAIT_TIME = rospy.Duration.from_sec(8)
-    STEP_DURATION = rospy.Duration.from_sec(0.4)
+    __WAIT_TIME = rospy.Duration.from_sec(8)
+    __STEP_DURATION = rospy.Duration.from_sec(0.4)
 
-    COLLISION_REWARD = -200
-    FORWARD_REWARD = +5
-    YAW_REWARD = -0.5
+    __COLLISION_REWARD = -200
+    __FORWARD_REWARD = +5
+    __YAW_REWARD = -0.5
 
-    FLYING_ALTITUDE = 1.5  # m
-    FORWARD_LINEAR_VELOCITY = 0.5  # m/s
-    YAW_LINEAR_VELOCITY = 0.1  # m/s
-    YAW_ANGULAR_VELOCITY = 0.5  # rad/s
-    WALL_DISTANCE_THRESHOLD = 0.4  # m
-    INIT_ALTITUDE = 4  # m
+    __FLYING_ALTITUDE = 1.5  # m
+    __FORWARD_LINEAR_VELOCITY = 0.5  # m/s
+    __YAW_LINEAR_VELOCITY = 0.1  # m/s
+    __YAW_ANGULAR_VELOCITY = 0.5  # rad/s
+    __WALL_DISTANCE_THRESHOLD = 0.4  # m
+    __INIT_ALTITUDE = 4  # m
 
-    VELOCITY_STANDARD_DEVIATION = 0.01
+    __VELOCITY_STANDARD_DEVIATION = 0.01
 
-    MEASUREMENTS = (180, 360, 540, 720, 900)
+    __MEASUREMENTS = (180, 360, 540, 720, 900)
 
-    N_OBSERVATIONS = len(MEASUREMENTS)
+    __N_OBSERVATIONS = len(__MEASUREMENTS)
 
-    SPAWN_AREA1 = (
+    __SPAWN_AREA1 = (
         ((-9, -9), (-9, 9)),
         ((-9, 9), (9, 9)),
         ((9, 9), (0, 9)),
@@ -50,7 +50,7 @@ class NavigationEnv(Env):
         ((-9, 0), (-9, -9))
     )
 
-    SPAWN_AREA2 = (
+    __SPAWN_AREA2 = (
         ((-0.2, -0.2), (-3.2, 3.1)),
         ((-0.2, -9.2), (3.1, 3.1)),
         ((-9.2, -9.2), (3.1, 12.4)),
@@ -65,7 +65,7 @@ class NavigationEnv(Env):
         ((-9.2, -0.2), (-3.2, -3.2))
     )
 
-    SPAWN_AREA3 = (
+    __SPAWN_AREA3 = (
         ((-4.7, 4.6), (-9.3, -9.3)),
         ((4.6, 4.6), (-9.3, -15.3)),
         ((4.6, 13.8), (-15.2, -15.2)),
@@ -81,66 +81,68 @@ class NavigationEnv(Env):
         ((-4.7, -4.7), (-15.2, -9.3))
     )
 
-    SPAWN_AREAS = (SPAWN_AREA1, SPAWN_AREA2, SPAWN_AREA3)
+    __SPAWN_AREAS = (__SPAWN_AREA1, __SPAWN_AREA2, __SPAWN_AREA3)
+
+    __spawn_area = None
+    __ranges = None
+    __range_max = None
+    __range_min = None
+    __cmd_vel_pub = None
+    __command_pose_pub = None
+    __action_space = None
+    __observation_space = None
 
     def __init__(self, track_id=1):
-        if track_id in range(1, len(self.SPAWN_AREAS) + 1):
-            self.spawn_area = self.SPAWN_AREAS[track_id - 1]
+        if track_id in range(1, len(self.__SPAWN_AREAS) + 1):
+            self.__spawn_area = self.__SPAWN_AREAS[track_id - 1]
         else:
             e = ValueError('Invalid track id '
                            '{} ({})'.format(track_id, type(track_id)))
             rospy.logerr(e)
 
-        self.ranges = None
-        self.range_max = None
-        self.range_min = None
-
-        self.cmd_vel_pub = rospy.Publisher('cmd_vel', Twist, queue_size=10)
-        self.command_pose_pub = rospy.Publisher(
+        self.__cmd_vel_pub = rospy.Publisher('cmd_vel', Twist, queue_size=10)
+        self.__command_pose_pub = rospy.Publisher(
             'command/pose', PoseStamped, queue_size=10)
 
-        rospy.Subscriber('scan', LaserScan, self.laser_scan_callback)
+        rospy.Subscriber('scan', LaserScan, self.__laser_scan_callback)
 
-        while not self.enable_motors():
+        while not self.__enable_motors():
             pass
 
-        while self.ranges is None:
+        while self.__ranges is None:
             pass
 
-        self.action_space = Discrete(self.N_ACTIONS)
+        self.__action_space = Discrete(self.__N_ACTIONS)
 
-        high = np.array(
-            self.N_OBSERVATIONS * [self.range_max], dtype=np.float32)
-        low = np.array(
-            self.N_OBSERVATIONS * [self.range_min], dtype=np.float32)
-        self.observation_space = Box(
-            low=low, high=high, shape=(self.N_OBSERVATIONS,), dtype=np.float32)
+        high = np.array(self.__N_OBSERVATIONS * [self.__range_max],
+                        dtype=np.float32)
+        low = np.array(self.__N_OBSERVATIONS * [self.__range_min],
+                       dtype=np.float32)
+        self.__observation_space = Box(low=low, high=high,
+                                       shape=(self.__N_OBSERVATIONS,),
+                                       dtype=np.float32)
 
-    def perform_action(self, action):
+    def __perform_action(self, action):
         vel_msg = Twist()
 
-        vel_msg.linear.x = gauss(0, self.VELOCITY_STANDARD_DEVIATION)
-        vel_msg.angular.z = gauss(0, self.VELOCITY_STANDARD_DEVIATION)
+        vel_msg.linear.x = random.gauss(0, self.__VELOCITY_STANDARD_DEVIATION)
+        vel_msg.angular.z = random.gauss(0, self.__VELOCITY_STANDARD_DEVIATION)
 
-        if action == self.FORWARD:
-            vel_msg.linear.x += self.FORWARD_LINEAR_VELOCITY
-        elif action == self.YAW_RIGHT:
-            vel_msg.linear.x += self.YAW_LINEAR_VELOCITY
-            vel_msg.angular.z += self.YAW_ANGULAR_VELOCITY
-        elif action == self.YAW_LEFT:
-            vel_msg.linear.x += self.YAW_LINEAR_VELOCITY
-            vel_msg.angular.z -= self.YAW_ANGULAR_VELOCITY
-        else:
-            e = ValueError('Invalid action '
-                           '{} ({})'.format(action, type(action)))
-            rospy.logerr(e)
+        if action == self.__FORWARD:
+            vel_msg.linear.x += self.__FORWARD_LINEAR_VELOCITY
+        elif action == self.__YAW_RIGHT:
+            vel_msg.linear.x += self.__YAW_LINEAR_VELOCITY
+            vel_msg.angular.z += self.__YAW_ANGULAR_VELOCITY
+        elif action == self.__YAW_LEFT:
+            vel_msg.linear.x += self.__YAW_LINEAR_VELOCITY
+            vel_msg.angular.z -= self.__YAW_ANGULAR_VELOCITY
 
-        self.cmd_vel_pub.publish(vel_msg)
+        self.__cmd_vel_pub.publish(vel_msg)
 
-    def fly_to(self, x, y, z, roll, pitch, yaw):
+    def __fly_to(self, x, y, z, roll, pitch, yaw):
         position = Point(x, y, z)
 
-        quaternion = quaternion_from_euler(roll, pitch, yaw)
+        quaternion = tf.transformations.quaternion_from_euler(roll, pitch, yaw)
         orientation = Quaternion(
             quaternion[0], quaternion[1], quaternion[2], quaternion[3])
 
@@ -148,9 +150,9 @@ class NavigationEnv(Env):
         header = Header(frame_id='world')
         pose_stamped = PoseStamped(header, pose)
 
-        self.command_pose_pub.publish(pose_stamped)
+        self.__command_pose_pub.publish(pose_stamped)
 
-    def enable_motors(self):
+    def __enable_motors(self):
         rospy.wait_for_service('enable_motors')
         try:
             enable_motors = rospy.ServiceProxy('enable_motors', EnableMotors)
@@ -161,24 +163,24 @@ class NavigationEnv(Env):
 
         return False
 
-    def laser_scan_callback(self, laser_scan):
-        if self.ranges is None:
-            self.range_max = laser_scan.range_max
-            self.range_min = laser_scan.range_min
-            self.ranges = np.empty((len(laser_scan.ranges),))
+    def __laser_scan_callback(self, laser_scan):
+        if self.__ranges is None:
+            self.__range_max = laser_scan.range_max
+            self.__range_min = laser_scan.range_min
+            self.__ranges = np.empty((len(laser_scan.ranges),))
 
-        for range_i in range(len(laser_scan.ranges)):
-            if (laser_scan.range_min <= laser_scan.ranges[range_i] <=
-                    laser_scan.range_max):
-                self.ranges[range_i] = laser_scan.ranges[range_i]
+        for i in range(len(laser_scan.ranges)):
+            if (laser_scan.range_min <= laser_scan.ranges[i]
+                    <= laser_scan.range_max):
+                self.__ranges[i] = laser_scan.ranges[i]
 
-    def collision_occured(self):
-        if self.ranges is None:
+    def __collision_occured(self):
+        if self.__ranges is None:
             return False
 
-        return (self.ranges < self.WALL_DISTANCE_THRESHOLD).any()
+        return (self.__ranges < self.__WALL_DISTANCE_THRESHOLD).any()
 
-    def reset_world(self):
+    def __reset_world(self):
         rospy.wait_for_service('gazebo/reset_world')
         try:
             reset_env = rospy.ServiceProxy('gazebo/reset_world', Empty)
@@ -187,52 +189,61 @@ class NavigationEnv(Env):
             rospy.logerr(e)
 
     def reset(self):
-        self.reset_world()
-        rospy.sleep(self.WAIT_TIME)
+        self.__reset_world()
+        rospy.sleep(self.__WAIT_TIME)
 
-        area = choice(self.spawn_area)
-        x = uniform(area[0][0], area[0][1])
-        y = uniform(area[1][0], area[1][1])
-        yaw = uniform(-math.pi, math.pi)
+        area = random.choice(self.__spawn_area)
+        x = random.uniform(area[0][0], area[0][1])
+        y = random.uniform(area[1][0], area[1][1])
+        yaw = random.uniform(-math.pi, math.pi)
 
-        self.fly_to(0, 0, self.INIT_ALTITUDE, 0, 0, 0)
-        rospy.sleep(self.WAIT_TIME)
-        self.fly_to(x, y, self.INIT_ALTITUDE, 0, 0, yaw)
-        rospy.sleep(self.WAIT_TIME)
-        self.fly_to(x, y, self.FLYING_ALTITUDE, 0, 0, yaw)
-        rospy.sleep(self.WAIT_TIME)
+        self.__fly_to(0, 0, self.__INIT_ALTITUDE, 0, 0, 0)
+        rospy.sleep(self.__WAIT_TIME)
+        self.__fly_to(x, y, self.__INIT_ALTITUDE, 0, 0, yaw)
+        rospy.sleep(self.__WAIT_TIME)
+        self.__fly_to(x, y, self.__FLYING_ALTITUDE, 0, 0, yaw)
+        rospy.sleep(self.__WAIT_TIME)
 
-        observation = [self.ranges[i] for i in self.MEASUREMENTS]
+        observation = [self.__ranges[i] for i in self.__MEASUREMENTS]
 
         return observation
 
     def step(self, action):
-        if not self.action_space.contains(action):
+        if not self.__action_space.contains(action):
             e = ValueError('Invalid action '
                            '{} ({})'.format(action, type(action)))
             rospy.logerr(e)
 
-        self.perform_action(action)
-        rospy.sleep(self.STEP_DURATION)
+        self.__perform_action(action)
+        rospy.sleep(self.__STEP_DURATION)
 
-        observation = [self.ranges[i] for i in self.MEASUREMENTS]
+        observation = [self.__ranges[i] for i in self.__MEASUREMENTS]
 
-        done = self.collision_occured()
+        done = self.__collision_occured()
         reward = 0
 
         if done:
-            reward = self.COLLISION_REWARD
-        elif action == self.FORWARD:
-            reward = self.FORWARD_REWARD
-        elif action == self.YAW_LEFT or action == self.YAW_RIGHT:
-            reward = self.YAW_REWARD
+            reward = self.__COLLISION_REWARD
+        elif action == self.__FORWARD:
+            reward = self.__FORWARD_REWARD
+        elif action == self.__YAW_LEFT or action == self.__YAW_RIGHT:
+            reward = self.__YAW_REWARD
 
         return observation, reward, done, []
 
     def render(self):
-        # Rendering is handled by Gazebo
         pass
 
     def close(self):
-        # No need to do something on close
         pass
+
+    def seed(self):
+        pass
+
+    @property
+    def action_space(self):
+        return self.__action_space
+
+    @property
+    def observation_space(self):
+        return self.__observation_space
