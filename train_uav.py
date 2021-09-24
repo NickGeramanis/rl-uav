@@ -24,7 +24,7 @@ def main():
     lambda_ = 0.5
 
     # Feature Constructor
-    n_tiles_per_dimension = [14, 14, 14, 14, 14]
+    n_tiles_per_dimension = np.array([14, 14, 14, 14, 14])
     displacement_vector = np.array([1, 1, 1, 1, 1])
     n_tilings = 7
     initial_learning_rate = 0.1 / n_tilings

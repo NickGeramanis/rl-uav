@@ -18,7 +18,7 @@ class TileCoding(FeatureConstructor):
                  state_space_low, state_space_high, displacement_vector):
         self.__n_tilings = n_tilings
         self.__n_actions = n_actions
-        self.__n_tiles_per_dimension = np.array(n_tiles_per_dimension) + 1
+        self.__n_tiles_per_dimension = n_tiles_per_dimension + 1
         self.__n_dimensions = len(self.__n_tiles_per_dimension)
         n_tiles_per_tiling = np.prod(self.__n_tiles_per_dimension)
         self.__n_tiles = n_tilings * n_tiles_per_tiling
@@ -54,20 +54,19 @@ class TileCoding(FeatureConstructor):
         return tilings
 
     def __get_active_features(self, state):
-        active_features = np.zeros((self.__n_tilings,), dtype=np.ndarray)
+        active_features = np.zeros((self.__n_tilings,), dtype=np.uint32)
         dimensions = np.append(self.__n_tilings, self.__n_tiles_per_dimension)
 
         for tiling_i in range(self.__n_tilings):
-            index = (tiling_i,)
-            for i in range(self.__n_dimensions):
-                index += (
-                    np.digitize(state[i], self.__tilings[tiling_i, i]) - 1,)
+            index = [tiling_i]
+            index += [np.digitize(state[i], self.__tilings[tiling_i, i]) - 1
+                      for i in range(self.__n_dimensions)]
 
             for j in range(len(dimensions)):
                 active_features[tiling_i] += (np.prod(dimensions[j + 1:])
                                               * index[j])
 
-        return tuple(active_features)
+        return active_features
 
     def calculate_q(self, weights, state):
         q = np.empty((self.__n_actions,))
@@ -84,7 +83,7 @@ class TileCoding(FeatureConstructor):
         features[action * self.__n_tiles + active_features] = 1
         return features
 
-    @property
+    @ property
     def n_features(self):
         return self.__n_features
 

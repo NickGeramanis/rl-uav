@@ -32,7 +32,7 @@ class NavigationEnv(Env):
     __FORWARD_LINEAR_VELOCITY = 0.5  # m/s
     __YAW_LINEAR_VELOCITY = 0.1  # m/s
     __YAW_ANGULAR_VELOCITY = 0.5  # rad/s
-    __WALL_DISTANCE_THRESHOLD = 0.4  # m
+    __COLISION_THRESHOLD = 0.4  # m
     __INIT_ALTITUDE = 4  # m
 
     __VELOCITY_STANDARD_DEVIATION = 0.01
@@ -178,7 +178,7 @@ class NavigationEnv(Env):
         if self.__ranges is None:
             return False
 
-        return (self.__ranges < self.__WALL_DISTANCE_THRESHOLD).any()
+        return bool((self.__ranges < self.__COLISION_THRESHOLD).any())
 
     def __reset_world(self):
         rospy.wait_for_service('gazebo/reset_world')
@@ -204,7 +204,7 @@ class NavigationEnv(Env):
         self.__fly_to(x, y, self.__FLYING_ALTITUDE, 0, 0, yaw)
         rospy.sleep(self.__WAIT_TIME)
 
-        observation = [self.__ranges[i] for i in self.__MEASUREMENTS]
+        observation = list(self.__ranges)
 
         return observation
 
@@ -217,16 +217,16 @@ class NavigationEnv(Env):
         self.__perform_action(action)
         rospy.sleep(self.__STEP_DURATION)
 
-        observation = [self.__ranges[i] for i in self.__MEASUREMENTS]
+        observation = list(self.__ranges)
 
         done = self.__collision_occured()
-        reward = 0
+        reward = 0.0
 
         if done:
             reward = self.__COLLISION_REWARD
         elif action == self.__FORWARD:
             reward = self.__FORWARD_REWARD
-        elif action == self.__YAW_LEFT or action == self.__YAW_RIGHT:
+        elif action in (self.__YAW_LEFT, self.__YAW_RIGHT):
             reward = self.__YAW_REWARD
 
         return observation, reward, done, []

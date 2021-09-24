@@ -1,7 +1,6 @@
 numpy
 coverage
-pylint
+flake8
 mypy
-pycodestyle
 autopep8
 isort

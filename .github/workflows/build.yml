@@ -28,8 +28,6 @@ jobs:
       # - name: Show coverage report
       #   run: coverage report
       # - name: Run linter
-      #   run: pylint src
+      #   run: flake8 src
       # - name: Run type checker
       #   run: mypy --ignore-missing-imports src
-      # - name: Run coding style checker
-      #   run: pycodestyle src
