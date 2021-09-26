@@ -6,16 +6,13 @@ from src.features.feature_constructor import FeatureConstructor
 
 
 class RadialBasisFunctions(FeatureConstructor):
-    __n_actions = None
-    __state_space_low = None
-    __state_space_high = None
-    __centers = None
-    __variance = None
-    __n_functions = None
-    __n_features = None
 
-    def __init__(self, n_actions, state_space_low, state_space_high,
-                 centers_per_dimension, standard_deviation):
+    def __init__(self,
+                 n_actions,
+                 state_space_low,
+                 state_space_high,
+                 centers_per_dimension,
+                 standard_deviation):
         self.__n_actions = n_actions
         self.__state_space_low = state_space_low
         self.__state_space_high = state_space_high

@@ -4,15 +4,12 @@ from src.rl_algorithms.rl_algorithm import RLAlgorithm
 
 
 class LSPI(RLAlgorithm):
-    __env = None
-    __discount_factor = None
-    __feature_constructor = None
-    __tolerance = None
-    __delta = None
-    __weights = None
-    __samples = None
 
-    def __init__(self, env, discount_factor, feature_constructor, tolerance,
+    def __init__(self,
+                 env,
+                 discount_factor,
+                 feature_constructor,
+                 tolerance,
                  delta):
         super(LSPI, self).__init__('info.log')
         self.__env = env
@@ -68,7 +65,8 @@ class LSPI(RLAlgorithm):
                                                            next_state)
                 best_action = int(np.argmax(q))
                 next_features = self.__feature_constructor.get_features(
-                    next_state, best_action)
+                    next_state,
+                    best_action)
 
             current_features = features_list[i]
 

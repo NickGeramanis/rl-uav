@@ -1,8 +1,9 @@
+.vscode/
 **/__pycache__
 **/.pytests_cache
 **/.mypy_cache
-.vscode/
 *.log
 *.npy
 *.pyc
+coverage/
 .coverage

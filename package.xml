@@ -11,10 +11,9 @@
   <depend>rospy</depend>
   <depend>gazebo-ros-pkgs</depend>
   <depend>hector_quadrotor</depend>
-  <depend>hector_slam</depend>
   <depend>hector_localization</depend>
   <depend>hector_gazebo</depend>
   <depend>hector_models</depend>
-  <exec_depend>numpy</exec_depend> 
+  <exec_depend>numpy</exec_depend>
   <export></export>
 </package>

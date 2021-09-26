@@ -7,18 +7,15 @@ from src.rl_algorithms.rl_algorithm import RLAlgorithm
 
 
 class LFASARSALambda(RLAlgorithm):
-    __env = None
-    __discount_factor = None
-    __initial_learning_rate = None
-    __learning_rate_midpoint = None
-    __learning_rate_steepness = None
-    __feature_constructor = None
-    __lambda = None
-    __weights = None
 
-    def __init__(self, env, discount_factor, initial_learning_rate,
-                 learning_rate_midpoint, learning_rate_steepness,
-                 feature_constructor, lambda_):
+    def __init__(self,
+                 env,
+                 discount_factor,
+                 initial_learning_rate,
+                 learning_rate_midpoint,
+                 learning_rate_steepness,
+                 feature_constructor,
+                 lambda_):
         super(LFASARSALambda, self).__init__('info.log')
         self.__env = env
         self.__discount_factor = discount_factor
@@ -81,7 +78,8 @@ class LFASARSALambda(RLAlgorithm):
                 td_error = td_target - current_q[current_action]
 
                 current_features = self.__feature_constructor.get_features(
-                    current_state, current_action)
+                    current_state,
+                    current_action)
                 eligibility_traces = (self.__discount_factor
                                       * self.__lambda
                                       * eligibility_traces

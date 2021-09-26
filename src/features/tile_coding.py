@@ -6,16 +6,14 @@ from src.features.feature_constructor import FeatureConstructor
 
 
 class TileCoding(FeatureConstructor):
-    __n_tilings = None
-    __n_actions = None
-    __n_tiles_per_dimension = None
-    __n_dimensions = None
-    __n_tiles = None
-    __tilings = None
-    __n_features = None
 
-    def __init__(self, n_actions, n_tilings, n_tiles_per_dimension,
-                 state_space_low, state_space_high, displacement_vector):
+    def __init__(self,
+                 n_actions,
+                 n_tilings,
+                 n_tiles_per_dimension,
+                 state_space_low,
+                 state_space_high,
+                 displacement_vector):
         self.__n_tilings = n_tilings
         self.__n_actions = n_actions
         self.__n_tiles_per_dimension = n_tiles_per_dimension + 1
@@ -27,7 +25,9 @@ class TileCoding(FeatureConstructor):
                                                displacement_vector)
         self.__n_features = self.__n_tiles * n_actions
 
-    def __create_tilings(self, state_space_low, state_space_high,
+    def __create_tilings(self,
+                         state_space_low,
+                         state_space_high,
                          displacement_vector):
         width = state_space_high - state_space_low
         tile_width = width / self.__n_tiles_per_dimension
