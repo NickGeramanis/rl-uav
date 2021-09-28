@@ -89,17 +89,15 @@
     <h3 id="gettingStarted">Getting Started</h3>
     <h4>Prerequisites</h4>
     <p>
-        This package has only been tested in ROS Kinetic (Ubuntu 16.04) -
-        Python
-        2.7.
+        This package has been tested in ROS Noetic (Ubuntu 20.04) - Python 3.7.
     </p>
     <p>Required ROS packages:</p>
     <ul>
-        <li>hector_quadrotor</li>
-        <li>hector_localization</li>
-        <li>hector_gazebo</li>
-        <li>hector_models</li>
-        <li>gazebo-ros-pkgs</li>
+        <li><a href="https://github.com/tu-darmstadt-ros-pkg/hector_quadrotor">hector_quadrotor</a></li>
+        <li><a href="https://github.com/tu-darmstadt-ros-pkg/hector_localization">hector_localization</a></li>
+        <li><a href="https://github.com/tu-darmstadt-ros-pkg/hector_gazebo">hector_gazebo</a></li>
+        <li><a href="https://github.com/tu-darmstadt-ros-pkg/hector_models">hector_models</a></li>
+        <li><a href="https://github.com/ros-simulation/gazebo_ros_pkgs">gazebo_ros_pkgs</a></li>
     </ul>
     <p>
         It is recommended that you build the above packages from source (clone
@@ -113,7 +111,7 @@
     <p>Clone the repository into your catkin workspace:</p>
     <code>
         cd ~/catkin_ws/src<br>
-        clone https://github.com/NickGeramanis/undergrad-thesis-rl-uav.git
+        clone https://github.com/NickGeramanis/rl-uav.git
     </code>
     <p>Build your catkin workspace:</p>
     <code>
@@ -134,7 +132,7 @@
         <quote>train.launch</quote>
         file:
     </p>
-    <code>roslaunch uav_rl train.launch world:=track1 gui:=true</code>
+    <code>roslaunch rl_uav train.launch world:=track1 gui:=true</code>
     <p>
         After the world has started, run the
         <quote>train_uav</quote>
@@ -142,7 +140,7 @@
         <quote>train_uav.py</quote>
         ) to begin the training process and test different algorithms:
     </p>
-    <code>rosrun uav_rl train_uav.py</code>
+    <code>rosrun rl_uav train_uav.py</code>
     <h3 id="about">About</h3>
     <h4>Status</h4>
     <p>Under maintenance.</p>
