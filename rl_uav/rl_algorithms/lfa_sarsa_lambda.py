@@ -2,21 +2,31 @@ import math
 import random
 
 import numpy as np
+import rospy
 
-from src.rl_algorithms.rl_algorithm import RLAlgorithm
+from rl_uav.envs.env import Env
+from rl_uav.features.feature_constructor import FeatureConstructor
+from rl_uav.rl_algorithms.rl_algorithm import RLAlgorithm
 
 
 class LFASARSALambda(RLAlgorithm):
+    __env: Env
+    __discount_factor: float
+    __initial_learning_rate: float
+    __learning_rate_midpoint: int
+    __learning_rate_steepness: float
+    __feature_constructor: FeatureConstructor
+    __lambda: float
+    __weights: np.ndarray
 
     def __init__(self,
-                 env,
-                 discount_factor,
-                 initial_learning_rate,
-                 learning_rate_midpoint,
-                 learning_rate_steepness,
-                 feature_constructor,
-                 lambda_):
-        super(LFASARSALambda, self).__init__('info.log')
+                 env: Env,
+                 discount_factor: float,
+                 initial_learning_rate: float,
+                 learning_rate_midpoint: int,
+                 learning_rate_steepness: float,
+                 feature_constructor: FeatureConstructor,
+                 lambda_: float) -> None:
         self.__env = env
         self.__discount_factor = discount_factor
         self.__initial_learning_rate = initial_learning_rate
@@ -26,9 +36,9 @@ class LFASARSALambda(RLAlgorithm):
         self.__lambda = lambda_
         self.__weights = np.random.random((feature_constructor.n_features,))
 
-        self._logger.info(self)
+        rospy.loginfo(self)
 
-    def train(self, n_episodes):
+    def train(self, n_episodes: int) -> None:
         for episode_i in range(n_episodes):
             episode_reward = 0.0
             episode_actions = 0
@@ -93,10 +103,10 @@ class LFASARSALambda(RLAlgorithm):
                 current_action = next_action
                 current_q = next_q
 
-            self._logger.info('episode=%d|reward=%f|actions=%d',
-                              episode_i, episode_reward, episode_actions)
+            rospy.loginfo(f'episode={episode_i}|reward={episode_reward}'
+                          f'|actions={episode_actions}')
 
-    def run(self, n_episodes, render=False):
+    def run(self, n_episodes: int, render: bool = False) -> None:
         for episode_i in range(n_episodes):
             episode_reward = 0.0
             episode_actions = 0
@@ -114,16 +124,14 @@ class LFASARSALambda(RLAlgorithm):
                 episode_reward += reward
                 episode_actions += 1
 
-            self._logger.info('episode=%d|reward=%f|actions=%d',
-                              episode_i, episode_reward, episode_actions)
+            rospy.loginfo(f'episode={episode_i}|reward={episode_reward}'
+                          f'|actions={episode_actions}')
 
-    def __str__(self):
+    def __str__(self) -> str:
         return ('SARSA(lambda) with Linear Function Approximation:'
-                'discount factor={}|initial learning rate = {}|'
-                'learning rate midpoint = {}|learning rate steepness = {}|'
-                'lambda = {}|{}').format(self.__discount_factor,
-                                         self.__initial_learning_rate,
-                                         self.__learning_rate_midpoint,
-                                         self.__learning_rate_steepness,
-                                         self.__lambda,
-                                         self.__feature_constructor)
+                f'discount factor={self.__discount_factor}|'
+                f'initial learning rate = {self.__initial_learning_rate}|'
+                f'learning rate midpoint = {self.__learning_rate_midpoint}|'
+                f'learning rate steepness = {self.__learning_rate_steepness}|'
+                f'lambda = {self.__lambda}|'
+                f'{self.__feature_constructor}')

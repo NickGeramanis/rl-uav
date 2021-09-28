@@ -78,15 +78,15 @@ https://doi.org/10.26233/heallink.tuc.87066
 
 ### Prerequisites
 
-This package has only been tested in ROS Kinetic (Ubuntu 16.04) - Python 2.7.
+This package has been tested in ROS Noetic (Ubuntu 20.04) - Python 3.8.
 
 Required ROS packages:
 
-- hector_quadrotor
-- hector_localization
-- hector_gazebo
-- hector_models
-- gazebo-ros-pkgs
+- [hector_quadrotor](https://github.com/tu-darmstadt-ros-pkg/hector_quadrotor)
+- [hector_localization](https://github.com/tu-darmstadt-ros-pkg/hector_localization)
+- [hector_gazebo](https://github.com/tu-darmstadt-ros-pkg/hector_gazebo)
+- [hector_models](https://github.com/tu-darmstadt-ros-pkg/hector_models)
+- [gazebo_ros_pkgs](https://github.com/ros-simulation/gazebo_ros_pkgs)
 
 It is recommended that you build the above packages from source (clone the
 corresponding git repositories)
@@ -101,7 +101,7 @@ Clone the repository into your catkin workspace:
 
 ```bash
 cd ~/catkin_ws/src
-clone https://github.com/NickGeramanis/undergrad-thesis-rl-uav.git
+clone https://github.com/NickGeramanis/rl-uav.git
 ```
 
 Build your catkin workspace:
@@ -123,14 +123,14 @@ source devel/setup.bash
 In order to launch a new world you must start the `train.launch` file:
 
 ```bash
-roslaunch uav_rl train.launch world:=track1 gui:=true
+roslaunch rl_uav train.launch world:=track1 gui:=true
 ```
 
 After the world has started, run the `train_uav` node (`train_uav.py`) to begin
 the training process and test different algorithms:
 
 ```bash
-rosrun uav_rl train_uav.py
+rosrun rl_uav train_uav.py
 ```
 
 ## Status

@@ -1,18 +1,21 @@
 #!/usr/bin/env python
 import math
 import random
+from typing import List, Optional, Tuple
 
 import numpy as np
 import rospy
-from std_srvs.srv import Empty
-from geometry_msgs.msg import Twist, Point, Pose, PoseStamped, Quaternion
-from hector_uav_msgs.srv import EnableMotors
-from sensor_msgs.msg import LaserScan
-from src.spaces.box import Box
-from src.spaces.discrete import Discrete
-from std_msgs.msg import Header
 import tf
-from env import Env
+from geometry_msgs.msg import Point, Pose, PoseStamped, Quaternion, Twist
+from hector_uav_msgs.srv import EnableMotors
+from rospy.topics import Publisher
+from sensor_msgs.msg import LaserScan
+from std_msgs.msg import Header
+from std_srvs.srv import Empty
+
+from rl_uav.envs.env import Env
+from rl_uav.spaces.box import Box
+from rl_uav.spaces.discrete import Discrete
 
 
 class NavigationEnv(Env):
@@ -83,33 +86,35 @@ class NavigationEnv(Env):
 
     __SPAWN_AREAS = (__SPAWN_AREA1, __SPAWN_AREA2, __SPAWN_AREA3)
 
-    __spawn_area = None
-    __ranges = None
-    __range_max = None
-    __range_min = None
-    __cmd_vel_pub = None
-    __command_pose_pub = None
-    __action_space = None
-    __observation_space = None
+    __spawn_area: Tuple[Tuple[Tuple[float, float], Tuple[float, float]], ...]
+    __ranges: np.ndarray
+    __are_ranges_initialized: bool
+    __range_max: float
+    __range_min: float
+    __cmd_vel_pub: Publisher
+    __command_pose_pub: Publisher
+    __action_space: Discrete
+    __observation_space: Box
 
-    def __init__(self, track_id=1):
+    def __init__(self, track_id: int = 1) -> None:
         if track_id in range(1, len(self.__SPAWN_AREAS) + 1):
             self.__spawn_area = self.__SPAWN_AREAS[track_id - 1]
         else:
-            e = ValueError('Invalid track id '
-                           '{} ({})'.format(track_id, type(track_id)))
-            rospy.logerr(e)
+            raise ValueError(f'Invalid track id {track_id} ({type(track_id)})')
+
+        self.__are_ranges_initialized = False
 
         self.__cmd_vel_pub = rospy.Publisher('cmd_vel', Twist, queue_size=10)
-        self.__command_pose_pub = rospy.Publisher(
-            'command/pose', PoseStamped, queue_size=10)
+        self.__command_pose_pub = rospy.Publisher('command/pose',
+                                                  PoseStamped,
+                                                  queue_size=10)
 
         rospy.Subscriber('scan', LaserScan, self.__laser_scan_callback)
 
         while not self.__enable_motors():
             pass
 
-        while self.__ranges is None:
+        while not self.__are_ranges_initialized:
             pass
 
         self.__action_space = Discrete(self.__N_ACTIONS)
@@ -118,11 +123,12 @@ class NavigationEnv(Env):
                         dtype=np.float32)
         low = np.array(self.__N_OBSERVATIONS * [self.__range_min],
                        dtype=np.float32)
-        self.__observation_space = Box(low=low, high=high,
+        self.__observation_space = Box(low=low,
+                                       high=high,
                                        shape=(self.__N_OBSERVATIONS,),
                                        dtype=np.float32)
 
-    def __perform_action(self, action):
+    def __perform_action(self, action: int) -> None:
         vel_msg = Twist()
 
         vel_msg.linear.x = random.gauss(0, self.__VELOCITY_STANDARD_DEVIATION)
@@ -139,7 +145,13 @@ class NavigationEnv(Env):
 
         self.__cmd_vel_pub.publish(vel_msg)
 
-    def __fly_to(self, x, y, z, roll, pitch, yaw):
+    def __fly_to(self,
+                 x: float,
+                 y: float,
+                 z: float,
+                 roll: float,
+                 pitch: float,
+                 yaw: float) -> None:
         position = Point(x, y, z)
 
         quaternion = tf.transformations.quaternion_from_euler(roll, pitch, yaw)
@@ -152,7 +164,7 @@ class NavigationEnv(Env):
 
         self.__command_pose_pub.publish(pose_stamped)
 
-    def __enable_motors(self):
+    def __enable_motors(self) -> bool:
         rospy.wait_for_service('enable_motors')
         try:
             enable_motors = rospy.ServiceProxy('enable_motors', EnableMotors)
@@ -163,24 +175,22 @@ class NavigationEnv(Env):
 
         return False
 
-    def __laser_scan_callback(self, laser_scan):
-        if self.__ranges is None:
+    def __laser_scan_callback(self, laser_scan: LaserScan) -> None:
+        if not self.__are_ranges_initialized:
             self.__range_max = laser_scan.range_max
             self.__range_min = laser_scan.range_min
             self.__ranges = np.empty((len(laser_scan.ranges),))
+            self.__are_ranges_initialized = True
 
         for i in range(len(laser_scan.ranges)):
             if (laser_scan.range_min <= laser_scan.ranges[i]
                     <= laser_scan.range_max):
                 self.__ranges[i] = laser_scan.ranges[i]
 
-    def __collision_occured(self):
-        if self.__ranges is None:
-            return False
-
+    def __collision_occured(self) -> bool:
         return bool((self.__ranges < self.__COLISION_THRESHOLD).any())
 
-    def __reset_world(self):
+    def __reset_world(self) -> None:
         rospy.wait_for_service('gazebo/reset_world')
         try:
             reset_env = rospy.ServiceProxy('gazebo/reset_world', Empty)
@@ -188,7 +198,7 @@ class NavigationEnv(Env):
         except rospy.ServiceException as e:
             rospy.logerr(e)
 
-    def reset(self):
+    def reset(self) -> List[float]:
         self.__reset_world()
         rospy.sleep(self.__WAIT_TIME)
 
@@ -208,11 +218,9 @@ class NavigationEnv(Env):
 
         return observation
 
-    def step(self, action):
+    def step(self, action: int) -> Tuple[List[float], float, bool, List[str]]:
         if not self.__action_space.contains(action):
-            e = ValueError('Invalid action '
-                           '{} ({})'.format(action, type(action)))
-            rospy.logerr(e)
+            raise ValueError(f'Invalid action {action} ({type(action)})')
 
         self.__perform_action(action)
         rospy.sleep(self.__STEP_DURATION)
@@ -231,19 +239,19 @@ class NavigationEnv(Env):
 
         return observation, reward, done, []
 
-    def render(self):
+    def render(self) -> None:
         pass
 
-    def close(self):
+    def close(self) -> None:
         pass
 
-    def seed(self):
+    def seed(self) -> List[float]:
         pass
 
     @property
-    def action_space(self):
+    def action_space(self) -> Discrete:
         return self.__action_space
 
     @property
-    def observation_space(self):
+    def observation_space(self) -> Box:
         return self.__observation_space

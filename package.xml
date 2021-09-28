@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>uav_rl</name>
+  <name>rl_uav</name>
   <version>0.1.0</version>
-  <description>A package that implements different reinforcement learning algorithms to solve the navigation problem of an unmanned aerial vehicle (UAV)</description>
+  <description>Implementation of different reinforcement learning algorithms to solve the navigation problem of an unmanned aerial vehicle (UAV)</description>
   <maintainer email="nickgeramanis@gmail.com">Nikolaos Geramanis</maintainer>
   <license>GPLv3</license>
-  <url type="website">https://nickgeramanis.github.io/undergrad-thesis-rl-uav/</url>
+  <url type="website">https://nickgeramanis.github.io/rl-uav/</url>
   <author email="nickgeramanis@gmail.com">Nikolaos Geramanis</author>
   <buildtool_depend>catkin</buildtool_depend>
   <depend>rospy</depend>

@@ -1,19 +1,24 @@
-from typing import List, Tuple
-
 import numpy as np
 
-from src.features.feature_constructor import FeatureConstructor
+from rl_uav.features.feature_constructor import FeatureConstructor
 
 
 class TileCoding(FeatureConstructor):
+    __n_tilings: int
+    __n_actions: int
+    __n_tiles_per_dimension: np.ndarray
+    __n_dimensions: int
+    __n_tiles: int
+    __tilings: np.ndarray
+    __n_features: int
 
     def __init__(self,
-                 n_actions,
-                 n_tilings,
-                 n_tiles_per_dimension,
-                 state_space_low,
-                 state_space_high,
-                 displacement_vector):
+                 n_actions: int,
+                 n_tilings: int,
+                 n_tiles_per_dimension: np.ndarray,
+                 state_space_low: np.ndarray,
+                 state_space_high: np.ndarray,
+                 displacement_vector: np.ndarray) -> None:
         self.__n_tilings = n_tilings
         self.__n_actions = n_actions
         self.__n_tiles_per_dimension = n_tiles_per_dimension + 1
@@ -26,9 +31,9 @@ class TileCoding(FeatureConstructor):
         self.__n_features = self.__n_tiles * n_actions
 
     def __create_tilings(self,
-                         state_space_low,
-                         state_space_high,
-                         displacement_vector):
+                         state_space_low: np.ndarray,
+                         state_space_high: np.ndarray,
+                         displacement_vector: np.ndarray) -> np.ndarray:
         width = state_space_high - state_space_low
         tile_width = width / self.__n_tiles_per_dimension
         tiling_offset = displacement_vector * tile_width / self.__n_tilings
@@ -42,7 +47,8 @@ class TileCoding(FeatureConstructor):
         # Create the first tile
         for i in range(self.__n_dimensions):
             tilings[0, i] = np.linspace(
-                min_value[i], max_value[i],
+                min_value[i],
+                max_value[i],
                 num=self.__n_tiles_per_dimension[i] + 1)
 
         # In order to create the rest tilings,
@@ -53,7 +59,7 @@ class TileCoding(FeatureConstructor):
 
         return tilings
 
-    def __get_active_features(self, state):
+    def __get_active_features(self, state: np.ndarray) -> np.ndarray:
         active_features = np.zeros((self.__n_tilings,), dtype=np.uint32)
         dimensions = np.append(self.__n_tilings, self.__n_tiles_per_dimension)
 
@@ -68,7 +74,9 @@ class TileCoding(FeatureConstructor):
 
         return active_features
 
-    def calculate_q(self, weights, state):
+    def calculate_q(self,
+                    weights: np.ndarray,
+                    state: np.ndarray) -> np.ndarray:
         q = np.empty((self.__n_actions,))
         active_features = self.__get_active_features(state)
         for action in range(self.__n_actions):
@@ -77,15 +85,15 @@ class TileCoding(FeatureConstructor):
 
         return q
 
-    def get_features(self, state, action):
+    def get_features(self, state: np.ndarray, action: int) -> np.ndarray:
         features = np.zeros((self.n_features,))
         active_features = self.__get_active_features(state)
         features[action * self.__n_tiles + active_features] = 1
         return features
 
-    @ property
-    def n_features(self):
+    @property
+    def n_features(self) -> int:
         return self.__n_features
 
-    def __str__(self):
-        return 'Tile Coding: tilings = {}'.format(self.__tilings)
+    def __str__(self) -> str:
+        return f'Tile Coding: tilings = {self.__tilings}'
