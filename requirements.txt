@@ -1,11 +1,6 @@
 numpy
 coverage
-flake8
-flake8-bugbear
-pep8-naming
-#flake8-doscstrings
-flake8-isort
-flake8-builtins
+pylint
 mypy
 autopep8
 isort

@@ -28,6 +28,6 @@ jobs:
       # - name: Show coverage report
       #   run: coverage report
       - name: Run linter
-        run: flake8 --exclude **/__init__.py --max-complexity 10 rl_uav/
+        run: pylint rl_uav/
       - name: Run type checker
         run: mypy --ignore-missing-imports rl_uav/
