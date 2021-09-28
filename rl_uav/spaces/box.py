@@ -121,7 +121,8 @@ class Box(Space):
         return sample.astype(self.__dtype)
 
     def contains(self, x: np.ndarray) -> bool:
-        return (x.shape == self._shape
+        return (isinstance(x, np.ndarray)
+                and x.shape == self.__shape
                 and np.all(x >= self.__low)
                 and np.all(x <= self.__high))
 
@@ -150,13 +151,13 @@ class Box(Space):
         return self.__bounded_above
 
     def __str__(self) -> str:
-        return (f'Box({self.low.min()}, '
-                f'{self.high.max()}, '
-                f'{self._shape}, '
-                f'{self._dtype})')
+        return (f'Box({self.__low.min()}, '
+                f'{self.__high.max()}, '
+                f'{self.__shape}, '
+                f'{self.__dtype})')
 
     def __eq__(self, other: Any) -> bool:
         return (isinstance(other, Box)
-                and self._shape == other.shape
-                and np.allclose(self.low, other.low)
-                and np.allclose(self.high, other.high))
+                and self.__shape == other.shape
+                and np.allclose(self.__low, other.low)
+                and np.allclose(self.__high, other.high))

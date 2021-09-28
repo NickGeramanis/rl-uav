@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import math
 import random
-from typing import List, Optional, Tuple
+from typing import List, Tuple
 
 import numpy as np
 import rospy
