@@ -13,12 +13,10 @@ class Space(ABC):
 
     @abstractmethod
     def sample(self) -> Any:
-        """Uniformly sample an element of this space."""
         pass
 
     @abstractmethod
     def contains(self, x: Any) -> bool:
-        """Check if x is a valid member of this space."""
         pass
 
     @property

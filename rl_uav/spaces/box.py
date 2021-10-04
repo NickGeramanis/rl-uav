@@ -74,12 +74,14 @@ class Box(Space):
         above = np.all(self.__bounded_above)
         if manner == 'both':
             return below and above
-        elif manner == 'below':
+
+        if manner == 'below':
             return below
-        elif manner == 'above':
+
+        if manner == 'above':
             return above
-        else:
-            raise ValueError('manner is not in {"below", "above", "both"}')
+
+        raise ValueError('manner is not in {"below", "above", "both"}')
 
     def sample(self) -> np.ndarray:
         """Generates a single random sample inside of the Box.

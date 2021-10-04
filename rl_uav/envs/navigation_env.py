@@ -182,15 +182,15 @@ class NavigationEnv(Env):
             self.__ranges = np.empty((len(laser_scan.ranges),))
             self.__are_ranges_initialized = True
 
-        for i in range(len(laser_scan.ranges)):
-            if (laser_scan.range_min <= laser_scan.ranges[i]
-                    <= laser_scan.range_max):
-                self.__ranges[i] = laser_scan.ranges[i]
+        for i, range_ in enumerate(laser_scan.ranges):
+            if laser_scan.range_min <= range_ <= laser_scan.range_max:
+                self.__ranges[i] = range_
 
     def __collision_occured(self) -> bool:
         return bool((self.__ranges < self.__COLISION_THRESHOLD).any())
 
-    def __reset_world(self) -> None:
+    @staticmethod
+    def __reset_world() -> None:
         rospy.wait_for_service('gazebo/reset_world')
         try:
             reset_env = rospy.ServiceProxy('gazebo/reset_world', Empty)

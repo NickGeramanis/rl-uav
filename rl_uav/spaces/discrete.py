@@ -24,9 +24,7 @@ class Discrete(Space):
         return random.randrange(self.n)
 
     def contains(self, x: Any) -> bool:
-        return ((isinstance(x, int)
-                 or isinstance(x, np.int_))
-                and 0 <= x < self.__n)
+        return isinstance(x, (int, np.int_)) and 0 <= x < self.__n
 
     @property
     def n(self) -> int:
