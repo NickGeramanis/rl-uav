@@ -1,6 +1,5 @@
 numpy
+gym
 coverage
 pylint
 mypy
-autopep8
-isort

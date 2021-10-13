@@ -15,5 +15,5 @@
   <depend>hector_gazebo</depend>
   <depend>hector_models</depend>
   <exec_depend>numpy</exec_depend>
-  <export></export>
+  <exec_depend>gym</exec_depend>
 </package>

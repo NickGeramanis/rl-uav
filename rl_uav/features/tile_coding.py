@@ -1,9 +1,13 @@
+"""This module contains the TileCoding class."""
+from typing import Tuple
+
 import numpy as np
 
 from rl_uav.features.feature_constructor import FeatureConstructor
 
 
 class TileCoding(FeatureConstructor):
+    """Construct features using Tile Coding."""
     __n_tilings: int
     __n_actions: int
     __n_tiles_per_dimension: np.ndarray
@@ -16,33 +20,28 @@ class TileCoding(FeatureConstructor):
                  n_actions: int,
                  n_tilings: int,
                  n_tiles_per_dimension: np.ndarray,
-                 state_space_low: np.ndarray,
-                 state_space_high: np.ndarray,
-                 displacement_vector: np.ndarray) -> None:
+                 state_space_range: Tuple[np.ndarray, np.ndarray]) -> None:
         self.__n_tilings = n_tilings
         self.__n_actions = n_actions
         self.__n_tiles_per_dimension = n_tiles_per_dimension + 1
         self.__n_dimensions = len(self.__n_tiles_per_dimension)
         n_tiles_per_tiling = np.prod(self.__n_tiles_per_dimension)
         self.__n_tiles = n_tilings * n_tiles_per_tiling
-        self.__tilings = self.__create_tilings(state_space_low,
-                                               state_space_high,
-                                               displacement_vector)
+        self.__tilings = self.__create_tilings(state_space_range)
         self.__n_features = self.__n_tiles * n_actions
 
-    def __create_tilings(self,
-                         state_space_low: np.ndarray,
-                         state_space_high: np.ndarray,
-                         displacement_vector: np.ndarray) -> np.ndarray:
-        width = state_space_high - state_space_low
+    def __create_tilings(
+            self,
+            state_space_range: Tuple[np.ndarray, np.ndarray]) -> np.ndarray:
+        width = state_space_range[1] - state_space_range[0]
         tile_width = width / self.__n_tiles_per_dimension
-        tiling_offset = displacement_vector * tile_width / self.__n_tilings
+        tiling_offset = tile_width / self.__n_tilings
 
         tilings = np.empty((self.__n_tilings, self.__n_dimensions),
                            dtype=np.ndarray)
 
-        min_value = state_space_low
-        max_value = state_space_high + tile_width
+        min_value = state_space_range[0]
+        max_value = state_space_range[1] + tile_width
 
         # Create the first tile
         for i in range(self.__n_dimensions):
@@ -77,13 +76,13 @@ class TileCoding(FeatureConstructor):
     def calculate_q(self,
                     weights: np.ndarray,
                     state: np.ndarray) -> np.ndarray:
-        q = np.empty((self.__n_actions,))
+        q_values = np.empty((self.__n_actions,))
         active_features = self.__get_active_features(state)
         for action in range(self.__n_actions):
-            q[action] = np.sum(
+            q_values[action] = np.sum(
                 weights[action * self.__n_tiles + active_features])
 
-        return q
+        return q_values
 
     def get_features(self, state: np.ndarray, action: int) -> np.ndarray:
         features = np.zeros((self.n_features,))

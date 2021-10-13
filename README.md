@@ -40,9 +40,6 @@ Track3:
 
 ![Track3](/images/track3.png)
 
-This project has been structured based
-on [OpenAI Gym](https://github.com/openai/gym) framework.
-
 ### Abstract
 
 Reinforcement learning is an area of machine learning concerned with how
@@ -94,6 +91,7 @@ corresponding git repositories)
 Required Python libraries:
 
 - NumPy
+- Gym
 
 ### Installation
 

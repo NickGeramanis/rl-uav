@@ -1,5 +1,6 @@
+"""This module contains the RadialBasisFunctions class."""
 import itertools
-from typing import List
+from typing import List, Tuple
 
 import numpy as np
 
@@ -7,9 +8,9 @@ from rl_uav.features.feature_constructor import FeatureConstructor
 
 
 class RadialBasisFunctions(FeatureConstructor):
+    """Construct features using Radial basis functions."""
     __n_actions: int
-    __state_space_low: np.ndarray
-    __state_space_high: np.ndarray
+    __state_space_range: Tuple[np.ndarray, np.ndarray]
     __centers: np.ndarray
     __variance: float
     __n_functions: int
@@ -17,13 +18,11 @@ class RadialBasisFunctions(FeatureConstructor):
 
     def __init__(self,
                  n_actions: int,
-                 state_space_low: np.ndarray,
-                 state_space_high: np.ndarray,
+                 state_space_range: Tuple[np.ndarray, np.ndarray],
                  centers_per_dimension: List[List[float]],
                  standard_deviation: float) -> None:
         self.__n_actions = n_actions
-        self.__state_space_low = state_space_low
-        self.__state_space_high = state_space_high
+        self.__state_space_range = state_space_range
         self.__centers = np.array(list(
             itertools.product(*centers_per_dimension)))
         self.__variance = 2 * standard_deviation ** 2
@@ -33,12 +32,12 @@ class RadialBasisFunctions(FeatureConstructor):
     def calculate_q(self,
                     weights: np.ndarray,
                     state: np.ndarray) -> np.ndarray:
-        q = np.empty((self.__n_actions,))
+        q_values = np.empty((self.__n_actions,))
         for action in range(self.__n_actions):
             features = self.get_features(state, action)
-            q[action] = np.dot(features, weights)
+            q_values[action] = np.dot(features, weights)
 
-        return q
+        return q_values
 
     def get_features(self, state: np.ndarray, action: int) -> np.ndarray:
         features = np.zeros((self.n_features,))
@@ -52,8 +51,8 @@ class RadialBasisFunctions(FeatureConstructor):
         return features
 
     def __normalize(self, value: np.ndarray) -> np.ndarray:
-        numerator = value - self.__state_space_low
-        denominator = self.__state_space_high - self.__state_space_low
+        numerator = value - self.__state_space_range[0]
+        denominator = self.__state_space_range[1] - self.__state_space_range[0]
         return numerator / denominator
 
     @property

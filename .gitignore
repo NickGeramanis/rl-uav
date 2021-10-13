@@ -1,4 +1,4 @@
-.vscode/
+.idea/
 **/__pycache__
 **/.pytests_cache
 **/.mypy_cache
