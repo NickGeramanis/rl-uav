@@ -5,7 +5,7 @@ import numpy as np
 
 
 class FeatureConstructor(ABC):
-    """This class defines the interface of the feature constructors."""
+    """This class defines the interface for the feature constructors."""
 
     @abstractmethod
     def calculate_q(self,

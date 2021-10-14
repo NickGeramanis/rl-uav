@@ -3,12 +3,12 @@ from abc import ABC, abstractmethod
 
 
 class RLAlgorithm(ABC):
-    """This class defines the interface of the rl algorithms."""
+    """This class defines the interface for the RL algorithms."""
 
     @abstractmethod
     def train(self, n_episodes: int) -> None:
-        """Execute the training process for a number of episodes."""
+        """Execute the training process for a given number of episodes."""
 
     @abstractmethod
     def run(self, n_episodes: int, render: bool = False) -> None:
-        """Run the environment for a number of episodes without learning."""
+        """Run the environment and act greedily for a number of episodes."""

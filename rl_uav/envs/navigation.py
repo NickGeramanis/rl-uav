@@ -19,7 +19,7 @@ from std_srvs.srv import Empty
 
 @dataclass
 class Euler:
-    """Orientation represented with euler angles"""
+    """Orientation represented with euler angles."""
     roll: float
     pitch: float
     yaw: float
@@ -100,8 +100,8 @@ class Navigation(Env):
     _ranges_range: Tuple[float, float]
     _cmd_vel_pub: Publisher
     _command_pose_pub: Publisher
-    _action_space: spaces.Discrete
-    _observation_space: spaces.Box
+    action_space: spaces.Discrete
+    observation_space: spaces.Box
 
     def __init__(self, track_id: int = 1) -> None:
         if track_id in range(1, len(self._SPAWN_AREAS) + 1):
@@ -119,22 +119,22 @@ class Navigation(Env):
 
         rospy.Subscriber('scan', LaserScan, self._laser_scan_callback)
 
-        while not self._enable_motors():
+        while not Navigation._enable_motors():
             pass
 
         while self._ranges is None:
             pass
 
-        self._action_space = spaces.Discrete(self._N_ACTIONS)
+        self.action_space = spaces.Discrete(self._N_ACTIONS)
 
         high = np.array(self._N_OBSERVATIONS * [self._ranges_range[0]],
                         dtype=np.float32)
         low = np.array(self._N_OBSERVATIONS * [self._ranges_range[1]],
                        dtype=np.float32)
-        self._observation_space = spaces.Box(low=low,
-                                             high=high,
-                                             shape=(self._N_OBSERVATIONS,),
-                                             dtype=np.float32)
+        self.observation_space = spaces.Box(low=low,
+                                            high=high,
+                                            shape=(self._N_OBSERVATIONS,),
+                                            dtype=np.float32)
 
     def _perform_action(self, action: int) -> None:
         vel_msg = Twist()
@@ -205,7 +205,7 @@ class Navigation(Env):
             rospy.logerr(exception)
 
     def reset(self) -> List[float]:
-        self._reset_world()
+        Navigation._reset_world()
         rospy.sleep(self._WAIT_TIME)
 
         area = random.choice(self._spawn_area)
@@ -231,7 +231,7 @@ class Navigation(Env):
         return observation
 
     def step(self, action: int) -> Tuple[List[float], float, bool, List[str]]:
-        if not self._action_space.contains(action):
+        if not self.action_space.contains(action):
             raise ValueError(f'Invalid action {action} ({type(action)})')
 
         self._perform_action(action)
@@ -255,13 +255,3 @@ class Navigation(Env):
 
     def render(self, mode="human"):
         """Rendering is handled by Gazebo."""
-
-    @property
-    def action_space(self) -> spaces.Discrete:
-        """The action space of the environment."""
-        return self._action_space
-
-    @property
-    def observation_space(self) -> spaces.Box:
-        """The observation space of the environment."""
-        return self._observation_space
