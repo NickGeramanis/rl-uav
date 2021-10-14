@@ -53,9 +53,8 @@ def main():
     lfa_sarsa_lambda.train(n_episodes)
 
     # Least-Squares Policy Iteration
-    delta = 0.1
     n_samples = 1000
-    lspi = LSPI(env, discount_factor, feature_constructor2, delta)
+    lspi = LSPI(env, discount_factor, feature_constructor2)
     lspi.gather_samples(n_samples)
     lspi.train(n_episodes)
     lspi.run(n_episodes)
