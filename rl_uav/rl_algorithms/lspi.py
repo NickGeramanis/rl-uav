@@ -1,4 +1,6 @@
 """This module contains the LSPI class."""
+import random
+
 import numpy as np
 import rospy
 from gym import Env
@@ -12,19 +14,16 @@ class LSPI(RLAlgorithm):
     _env: Env
     _discount_factor: float
     _feature_constructor: FeatureConstructor
-    _delta: float
     _weights: np.ndarray
     _samples: np.ndarray
 
     def __init__(self,
                  env: Env,
                  discount_factor: float,
-                 feature_constructor: FeatureConstructor,
-                 delta: float) -> None:
+                 feature_constructor: FeatureConstructor) -> None:
         self._env = env
         self._discount_factor = discount_factor
         self._feature_constructor = feature_constructor
-        self._delta = delta
 
         rospy.loginfo(self)
 
@@ -61,7 +60,7 @@ class LSPI(RLAlgorithm):
         return features_list
 
     def _lstdq(self, features_list: np.ndarray) -> np.ndarray:
-        a_matrix = (self._delta
+        a_matrix = (random.random()
                     * np.identity(self._feature_constructor.n_features))
         b_matrix = np.zeros((self._feature_constructor.n_features,))
 
