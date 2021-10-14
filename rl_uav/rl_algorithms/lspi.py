@@ -129,9 +129,8 @@ class LSPI(RLAlgorithm):
                 if render:
                     self._env.render()
 
-                q_values = self._feature_constructor.calculate_q(
-                    self._weights,
-                    np.array(state))
+                q_values = self._feature_constructor.calculate_q(self._weights,
+                                                                 state)
                 action = q_values
                 state, reward, done, _ = self._env.step(action)
                 episode_reward += reward

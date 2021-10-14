@@ -62,7 +62,7 @@ class LFASARSALambda(RLAlgorithm):
                 (self._feature_constructor.n_features,))
             current_q_values = self._feature_constructor.calculate_q(
                 self._weights,
-                np.array(current_state))
+                current_state)
 
             if random.random() <= epsilon:
                 current_action = self._env.action_space.sample()
@@ -76,7 +76,7 @@ class LFASARSALambda(RLAlgorithm):
 
                 next_q_values = self._feature_constructor.calculate_q(
                     self._weights,
-                    np.array(next_state))
+                    next_state)
 
                 if random.random() <= epsilon:
                     next_action = self._env.action_space.sample()
@@ -91,7 +91,7 @@ class LFASARSALambda(RLAlgorithm):
                 td_error = td_target - current_q_values[current_action]
 
                 current_features = self._feature_constructor.get_features(
-                    np.array(current_state),
+                    current_state,
                     current_action)
                 eligibility_traces = (self._discount_factor
                                       * self._lambda
@@ -120,9 +120,8 @@ class LFASARSALambda(RLAlgorithm):
                 if render:
                     self._env.render()
 
-                q_values = self._feature_constructor.calculate_q(
-                    self._weights,
-                    np.array(state))
+                q_values = self._feature_constructor.calculate_q(self._weights,
+                                                                 state)
                 action = np.argmax(q_values)
                 state, reward, done, _ = self._env.step(action)
                 episode_reward += reward
