@@ -29,20 +29,22 @@
     <h2>
         Implementation of different reinforcement learning algorithms to solve
         the navigation problem of an unmanned aerial vehicle (UAV) using
-        <a href="https://www.ros.org/">ROS</a>/<a href="http://gazebosim.org/">Gazebo</a> and Python.
+        <a href="https://www.ros.org/">ROS</a>
+        /
+        <a href="http://gazebosim.org/">Gazebo</a>
+        and Python.
     </h2>
     <h3 id="description">Description</h3>
     <p>
         <quote>navigation_env.py</quote>
-        : The goal of this environment is to navigate a
-        robot on a track without crashing into the walls. Initially, the robot
-        is placed randomly into the track but at a safe distance from the
-        walls. The state-space consists of 5 range measurements. The
-        action-space consist of 3 actions (move_forward, rotate_left,
-        rotate_right). Furthermore, both actions and states have additive white
-        Gaussian noise. The robot is rewarded +5 for moving forward and -0.5
-        for rotating. If the robot crashes into the wall it is penalized with
-        -200.
+        : The goal of this environment is to navigate a robot on a track
+        without crashing into the walls. Initially, the robot is placed
+        randomly into the track but at a safe distance from the walls.
+        The state-space consists of 5 range measurements. The action-space
+        consist of 3 actions (move_forward, rotate_left, rotate_right).
+        Furthermore, both actions and states have additive white Gaussian
+        noise. The robot is rewarded +5 for moving forward and -0.5 for
+        rotating. If the robot crashes into the wall it is penalized with -200.
     </p>
     <p>There are 3 available worlds/tracks:</p>
     <p>Track1:</p>
@@ -89,11 +91,21 @@
     </p>
     <p>Required ROS packages:</p>
     <ul>
-        <li><a href="https://github.com/tu-darmstadt-ros-pkg/hector_quadrotor">hector_quadrotor</a></li>
-        <li><a href="https://github.com/tu-darmstadt-ros-pkg/hector_localization">hector_localization</a></li>
-        <li><a href="https://github.com/tu-darmstadt-ros-pkg/hector_gazebo">hector_gazebo</a></li>
-        <li><a href="https://github.com/tu-darmstadt-ros-pkg/hector_models">hector_models</a></li>
-        <li><a href="https://github.com/ros-simulation/gazebo_ros_pkgs">gazebo_ros_pkgs</a></li>
+        <li>
+            <a href="https://github.com/tu-darmstadt-ros-pkg/hector_quadrotor">hector_quadrotor</a>
+        </li>
+        <li>
+            <a href="https://github.com/tu-darmstadt-ros-pkg/hector_localization">hector_localization</a>
+        </li>
+        <li>
+            <a href="https://github.com/tu-darmstadt-ros-pkg/hector_gazebo">hector_gazebo</a>
+        </li>
+        <li>
+            <a href="https://github.com/tu-darmstadt-ros-pkg/hector_models">hector_models</a>
+        </li>
+        <li>
+            <a href="https://github.com/ros-simulation/gazebo_ros_pkgs">gazebo_ros_pkgs</a>
+        </li>
     </ul>
     <p>
         It is recommended that you build the above packages from source (clone
@@ -107,7 +119,7 @@
     <h4>Installation</h4>
     <p>Clone the repository into your catkin workspace:</p>
     <code>
-        cd ~/catkin_ws/src<br>
+        cd ~/catkin_ws/src <br>
         clone https://github.com/NickGeramanis/rl-uav.git
     </code>
     <p>Build your catkin workspace:</p>
@@ -116,8 +128,8 @@
         catkin_make
     </code>
     <p>
-        Do not forget to source the new 
-        <quote>setup.*sh</quote> 
+        Do not forget to source the new
+        <quote>setup.*sh</quote>
         file:
     </p>
     <code>
@@ -143,7 +155,7 @@
     <p>Under maintenance.</p>
     <h4>License</h4>
     <p>
-        Distributed under the GPL-3.0 License. See 
+        Distributed under the GPL-3.0 License. See
         <quote>LICENSE</quote>
         for more information.
     </p>
