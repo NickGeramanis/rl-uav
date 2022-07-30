@@ -11,7 +11,7 @@ from rl_uav.rl_algorithms.lspi import LSPI
 
 def main():
     rospy.init_node('train_uav')
-    env = Navigation(1)
+    env = Navigation(track_id=1)
 
     n_episodes = 500
 

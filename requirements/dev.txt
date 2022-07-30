@@ -1,5 +1,4 @@
-numpy
-gym
-coverage
-pylint
-mypy
+gym==0.25.0
+numpy==1.23.1
+pylint==2.14.5
+mypy==0.971
