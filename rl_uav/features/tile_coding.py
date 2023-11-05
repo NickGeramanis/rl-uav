@@ -3,18 +3,17 @@ from typing import Tuple
 
 import numpy as np
 
-from rl_uav.features.feature_constructor import FeatureConstructor
+from rl_uav.features.linear_function_approximation import \
+    LinearFunctionApproximation
 
 
-class TileCoding(FeatureConstructor):
+class TileCoding(LinearFunctionApproximation):
     """Construct features using Tile Coding."""
     _n_tilings: int
-    _n_actions: int
     _n_tiles_per_dimension: np.ndarray
     _n_dimensions: int
     _n_tiles: int
     _tilings: np.ndarray
-    _n_features: int
 
     def __init__(self,
                  n_actions: int,
@@ -28,7 +27,7 @@ class TileCoding(FeatureConstructor):
         n_tiles_per_tiling = np.prod(self._n_tiles_per_dimension)
         self._n_tiles = n_tilings * n_tiles_per_tiling
         self._tilings = self._create_tilings(state_space_range)
-        self._n_features = self._n_tiles * n_actions
+        self.n_features = self._n_tiles * n_actions
 
     def _create_tilings(
             self,
@@ -85,14 +84,7 @@ class TileCoding(FeatureConstructor):
         return q_values
 
     def get_features(self, state: np.ndarray, action: int) -> np.ndarray:
-        features = np.zeros((self._n_features,))
+        features = np.zeros((self.n_features,))
         active_features = self._get_active_features(state)
         features[action * self._n_tiles + active_features] = 1
         return features
-
-    @property
-    def n_features(self) -> int:
-        return self._n_features
-
-    def __str__(self) -> str:
-        return f'Tile Coding: tilings = {self._tilings}'

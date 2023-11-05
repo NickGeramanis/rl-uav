@@ -18,12 +18,18 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.8'
+          python-version: '3.11.5'
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements/dev.txt
+          pip install -r requirements.txt
+      - name: Run tests
+        run: coverage run --branch --source=rl_uav/ --omit=**/__init__.py -m pytest
+      - name: Show coverage report
+        run: coverage report
       - name: Run linter
+        if: always()
         run: pylint rl_uav/
       - name: Run type checker
+        if: always()
         run: mypy --ignore-missing-imports rl_uav/

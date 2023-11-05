@@ -3,7 +3,6 @@ import numpy as np
 import rospy
 
 from rl_uav.envs.navigation import Navigation
-from rl_uav.features.radial_basis_functions import RadialBasisFunctions
 from rl_uav.features.tile_coding import TileCoding
 from rl_uav.rl_algorithms.lfa_sarsa_lambda import LFASARSALambda
 from rl_uav.rl_algorithms.lspi import LSPI
@@ -29,20 +28,6 @@ def main():
                                       n_tiles_per_dimension,
                                       state_space_range)
 
-    # Radial Basis Functions
-    standard_deviation = 0.25
-    centers_per_dimension = [
-        [0.2, 0.4, 0.6, 0.8],
-        [0.2, 0.4, 0.6, 0.8],
-        [0.2, 0.4, 0.6, 0.8],
-        [0.2, 0.4, 0.6, 0.8],
-        [0.2, 0.4, 0.6, 0.8]
-    ]
-    feature_constructor2 = RadialBasisFunctions(env.action_space.n,
-                                                state_space_range,
-                                                centers_per_dimension,
-                                                standard_deviation)
-
     # SARSA(lambda) with Linear Function Approximation
     lfa_sarsa_lambda = LFASARSALambda(env,
                                       discount_factor,
@@ -53,11 +38,11 @@ def main():
     lfa_sarsa_lambda.train(n_episodes)
 
     # Least-Squares Policy Iteration
-    n_samples = 1000
-    lspi = LSPI(env, discount_factor, feature_constructor2)
-    lspi.gather_samples(n_samples)
-    lspi.train(n_episodes)
-    lspi.run(n_episodes)
+    # n_samples = 1000
+    # lspi = LSPI(env, discount_factor, feature_constructor2)
+    # lspi.gather_samples(n_samples)
+    # lspi.train(n_episodes)
+    # lspi.run(n_episodes)
 
 
 if __name__ == '__main__':

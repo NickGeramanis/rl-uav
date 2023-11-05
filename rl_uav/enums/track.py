@@ -6,10 +6,7 @@ from typing import Tuple
 class Track(Enum):
     """The Track enum."""
 
-    # pylint: disable=invalid-name
     spawn_area: Tuple[Tuple[Tuple[float, float], Tuple[float, float]], ...]
-
-    # pylint: enable=invalid-name
 
     def __new__(cls,
                 value: int,

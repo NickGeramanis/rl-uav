@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 """This module contains the basic Navigation environment class."""
 import math
-from typing import Tuple, Optional, Any, Dict, List
+from typing import Tuple, Optional, List, Union
 
 import numpy as np
 import rospy
 import tf
 from geometry_msgs.msg import Point, Pose, PoseStamped, Quaternion, Twist
-from gym import Env
-from gym.core import RenderFrame
-from gym.spaces import Discrete, Box
+from gymnasium import Env
+from gymnasium.core import RenderFrame
+from gymnasium.spaces import Discrete, Box
 from hector_uav_msgs.srv import EnableMotors
 from rospy.topics import Publisher
 from sensor_msgs.msg import LaserScan
@@ -53,7 +53,7 @@ class Navigation(Env):
                 and render_mode not in self.metadata['render_modes']):
             raise ValueError(f'Mode {render_mode} is not supported')
 
-        self.render_mode = render_mode  # type: ignore
+        self.render_mode = render_mode
         self._track = Track(track_id)
 
         self._ranges = None
@@ -151,9 +151,7 @@ class Navigation(Env):
     def reset(self,
               *,
               seed: Optional[int] = None,
-              return_info: bool = False,
-              options: Optional[dict] = None
-              ) -> np.ndarray | Tuple[np.ndarray, dict]:
+              options: Optional[dict] = None) -> Tuple[np.ndarray, dict]:
         super().reset(seed=seed)
         Navigation._reset_world()
         rospy.sleep(self._WAIT_TIME)
@@ -176,7 +174,7 @@ class Navigation(Env):
         if self._ranges is None:
             raise ValueError
 
-        return (self._ranges, {}) if return_info else self._ranges
+        return self._ranges, {}
 
     def step(self, action: int) -> Tuple[np.ndarray, float, bool, bool, dict]:
         if not self.action_space.contains(action):
@@ -200,7 +198,5 @@ class Navigation(Env):
 
         return self._ranges, reward, terminated, truncated, {}
 
-    def render(self,
-               mode: str = 'human'
-               ) -> Optional[List[RenderFrame]]:
+    def render(self) -> Optional[Union[RenderFrame, List[RenderFrame]]]:
         """Rendering is handled by Gazebo."""

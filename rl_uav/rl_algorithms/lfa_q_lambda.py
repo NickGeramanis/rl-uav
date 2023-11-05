@@ -1,17 +1,16 @@
-"""This module contains the LFASARSALambda class."""
+"""This module contains the LFAQLambda class."""
 import math
 import random
 
 import numpy as np
-import rospy
 from gymnasium import Env
 
-from rl_uav.features.linear_function_approximation import LinearFunctionApproximation
 from rl_uav.rl_algorithms.rl_algorithm import RLAlgorithm
+from rl_uav.features.linear_function_approximation import LinearFunctionApproximation
 
 
-class LFASARSALambda(RLAlgorithm):
-    """The SARSA(lambda) algorithm with Linear Function Approximation."""
+class LFAQLambda(RLAlgorithm):
+    """The Q(lambda) algorithm with Linear Function Approximation."""
     _env: Env
     _discount_factor: float
     _initial_learning_rate: float
@@ -81,6 +80,11 @@ class LFASARSALambda(RLAlgorithm):
                 else:
                     next_action = np.argmax(next_q_values)
 
+                if next_q_values[next_action] == np.max(next_q_values):
+                    best_action = next_action
+                else:
+                    best_action = np.argmax(next_q_values)
+
                 td_target = reward
                 if not terminated:
                     td_target += (self._discount_factor
@@ -88,23 +92,26 @@ class LFASARSALambda(RLAlgorithm):
 
                 td_error = td_target - current_q_values[current_action]
 
-                current_features = self._feature_constructor.get_features(
-                    current_state,
-                    current_action)
-                eligibility_traces = (self._discount_factor
-                                      * self._lambda
-                                      * eligibility_traces
-                                      + current_features)
+                if best_action == next_action:
+                    features = self._feature_constructor.get_features(
+                        current_state,
+                        current_action)
+                    eligibility_traces = (self._discount_factor
+                                          * self._lambda
+                                          * eligibility_traces
+                                          + features)
+                else:
+                    eligibility_traces *= 0
 
-                self._weights += (learning_rate
-                                  * td_error
-                                  * eligibility_traces)
+                self._weights += learning_rate * td_error * eligibility_traces
 
                 current_state = next_state
                 current_action = next_action
                 current_q_values = next_q_values
 
-            rospy.loginfo(f'episode={episode_i}|reward={episode_reward}')
+            self._logger.info('episode=%d|reward=%f',
+                              episode_i,
+                              episode_reward)
 
     def run(self, n_episodes: int) -> None:
         for episode_i in range(n_episodes):
@@ -120,4 +127,6 @@ class LFASARSALambda(RLAlgorithm):
                     action)
                 episode_reward += reward
 
-            rospy.loginfo(f'episode={episode_i}|reward={episode_reward}')
+            self._logger.info('episode=%d|reward=%f',
+                              episode_i,
+                              episode_reward)

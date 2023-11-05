@@ -3,48 +3,51 @@ import random
 
 import numpy as np
 import rospy
-from gym import Env
+from gymnasium import Env
 
-from rl_uav.features.feature_constructor import FeatureConstructor
+from rl_uav.features.linear_function_approximation import LinearFunctionApproximation
 from rl_uav.rl_algorithms.rl_algorithm import RLAlgorithm
 
 
 class LSPI(RLAlgorithm):
-    """The Least Squares Policy Iteration (LSPI) algorithm."""
+    """The Least Squares Policy Iteration algorithm."""
     _env: Env
     _discount_factor: float
-    _feature_constructor: FeatureConstructor
+    _n_samples: int
+    _feature_constructor: LinearFunctionApproximation
     _weights: np.ndarray
     _samples: np.ndarray
 
     def __init__(self,
                  env: Env,
                  discount_factor: float,
-                 feature_constructor: FeatureConstructor) -> None:
+                 n_samples: int,
+                 feature_constructor: LinearFunctionApproximation) -> None:
+        super().__init__()
         self._env = env
         self._discount_factor = discount_factor
+        self._n_samples = n_samples
         self._feature_constructor = feature_constructor
 
-        rospy.loginfo(self)
-
-    def gather_samples(self, n_samples: int) -> None:
+    def _gather_samples(self) -> None:
         """Gather samples by following a random policy."""
-        self._samples = np.empty((n_samples,), dtype=tuple)
+        self._samples = np.empty((self._n_samples,), dtype=tuple)
         samples_gathered = 0
         current_state = self._env.observation_space.sample()
-        done = True
+        terminated = truncated = True
 
-        while samples_gathered < n_samples:
-            if done:
-                current_state = self._env.reset()
+        while samples_gathered < self._n_samples:
+            if terminated or truncated:
+                current_state, _ = self._env.reset()
 
             action = self._env.action_space.sample()
-            next_state, reward, done, _ = self._env.step(action)
+            next_state, reward, terminated, truncated, _ = self._env.step(
+                action)
             self._samples[samples_gathered] = (current_state,
                                                action,
                                                reward,
                                                next_state,
-                                               done)
+                                               terminated)
             samples_gathered += 1
             current_state = next_state
 
@@ -67,16 +70,15 @@ class LSPI(RLAlgorithm):
         for i, sample in enumerate(self._samples):
             reward = sample[2]
             next_state = sample[3]
-            done = sample[4]
+            terminated = sample[4]
 
-            if done:
+            if terminated:
                 next_features = np.zeros(
                     (self._feature_constructor.n_features,))
             else:
-                q_values = self._feature_constructor.calculate_q(
-                    self._weights,
-                    next_state)
-                best_action = np.argmax(q_values)
+                q_values = self._feature_constructor.calculate_q(self._weights,
+                                                                 next_state)
+                best_action = int(np.argmax(q_values))
                 next_features = self._feature_constructor.get_features(
                     next_state,
                     best_action)
@@ -102,6 +104,7 @@ class LSPI(RLAlgorithm):
         return np.matmul(a_inverse, b_matrix)
 
     def train(self, n_episodes: int) -> None:
+        self._gather_samples()
         new_weights = np.random.random(
             (self._feature_constructor.n_features,))
         features_list = self._calculate_features_list()
@@ -117,27 +120,18 @@ class LSPI(RLAlgorithm):
             if weights_difference <= 0:
                 break
 
-    def run(self, n_episodes: int, render: bool = False) -> None:
+    def run(self, n_episodes: int) -> None:
         for episode_i in range(n_episodes):
             episode_reward = 0.0
-            episode_actions = 0
-            state = self._env.reset()
-            done = False
+            state, _ = self._env.reset()
+            terminated = truncated = False
 
-            while not done:
-                if render:
-                    self._env.render()
-
+            while not terminated or not truncated:
                 q_values = self._feature_constructor.calculate_q(self._weights,
                                                                  state)
-                action = q_values
-                state, reward, done, _ = self._env.step(action)
+                action = np.argmax(q_values)
+                state, reward, terminated, truncated, _ = self._env.step(
+                    action)
                 episode_reward += reward
-                episode_actions += 1
 
-            rospy.loginfo(f'episode={episode_i}|reward={episode_reward}'
-                          f'|actions={episode_actions}')
-
-    def __str__(self) -> str:
-        return (f'LSPI: discount factor = {self._discount_factor}|'
-                f'{self._feature_constructor}')
+            rospy.loginfo(f'episode={episode_i}|reward={episode_reward}')
