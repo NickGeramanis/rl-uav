@@ -91,6 +91,12 @@ Run the container:
 docker run -it rl-uav
 ```
 
+Due to XmlRpcServer querying all possible file descriptors, it may be required to lower the corresponding limit depending on your system:
+
+```bash
+docker run --ulimit nofile=1024:524288 -it rl-uav
+```
+
 Build the ros package:
 
 ```bash
