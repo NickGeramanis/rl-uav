@@ -18,13 +18,13 @@ using [ROS](https://www.ros.org/)/[Gazebo](http://gazebosim.org/) and Python.
 
 ## Description
 
-`navigation_env.py`: The goal of this environment is to navigate a robot on a
-track without crashing into the walls. Initially, the robot is placed randomly
-into the track but at a safe distance from the walls. The state-space consists
-of 5 range measurements. The action-space consist of 3 actions (move_forward,
+`navigation_env.py`: The goal of this environment is to navigate an UAV on a
+track without crashing into the walls. Initially, the UAV is placed randomly
+into the track but at a safe distance from the walls. The state space consists
+of 5 range measurements. The action space consists of 3 actions (move_forward,
 rotate_left, rotate_right). Furthermore, both actions and states have additive
-white Gaussian noise. The robot is rewarded +5 for moving forward and -0.5 for
-rotating. If the robot crashes into the wall it is penalized with -200.
+white Gaussian noise. The UAV is rewarded +5 for moving forward and -0.5 for
+rotating. If the UAV crashes into the wall it is penalized with -200.
 
 There are 3 available worlds/tracks:
 
@@ -75,45 +75,33 @@ https://doi.org/10.26233/heallink.tuc.87066
 
 ### Prerequisites
 
-This package has been tested in ROS Noetic (Ubuntu 20.04) - Python 3.8.
-
-Required ROS packages:
-
-- [hector_quadrotor](https://github.com/tu-darmstadt-ros-pkg/hector_quadrotor)
-- [hector_localization](https://github.com/tu-darmstadt-ros-pkg/hector_localization)
-- [hector_gazebo](https://github.com/tu-darmstadt-ros-pkg/hector_gazebo)
-- [hector_models](https://github.com/tu-darmstadt-ros-pkg/hector_models)
-- [gazebo_ros_pkgs](https://github.com/ros-simulation/gazebo_ros_pkgs)
-
-It is recommended that you build the above packages from source (clone the
-corresponding git repositories)
-
-Required Python libraries:
-
-- NumPy
-- Gym
+This package is provided as a docker image.
 
 ### Installation
 
-Clone the repository into your catkin workspace:
+Build the docker image:
 
 ```bash
-cd ~/catkin_ws/src
-clone https://github.com/NickGeramanis/rl-uav.git
+docker build -t rl-uav .
 ```
 
-Build your catkin workspace:
+Run the container:
 
 ```bash
-cd ~/catkin_ws
+docker run -it rl-uav
+```
+
+Due to XmlRpcServer querying all possible file descriptors, it may be required to lower the corresponding limit depending on your system:
+
+```bash
+docker run --ulimit nofile=1024:524288 -it rl-uav
+```
+
+Build the ros package:
+
+```bash
+cd /home/catkin_ws
 catkin_make
-```
-
-Do not forget to source the new `setup.*sh` file:
-
-```bash
-cd ~/catkin_ws
-source devel/setup.bash
 ```
 
 ## Usage
@@ -121,13 +109,15 @@ source devel/setup.bash
 In order to launch a new world you must start the `train.launch` file:
 
 ```bash
-roslaunch rl_uav train.launch world:=track1 gui:=true
+source /home/catkin_ws/devel/setup.bash
+roslaunch rl_uav train.launch world:=track1 gui:=false
 ```
 
 After the world has started, run the `train_uav` node (`train_uav.py`) to begin
 the training process and test different algorithms:
 
 ```bash
+source /home/catkin_ws/devel/setup.bash
 rosrun rl_uav train_uav.py
 ```
 

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <launch>
-  <arg name="world" default="track" />
+  <arg name="world" default="track1" />
   <arg name="gui" default="true" />
 
   <include file="$(find hector_gazebo_worlds)/launch/start.launch">

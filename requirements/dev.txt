@@ -1,5 +1,0 @@
-numpy
-gym
-coverage
-pylint
-mypy
