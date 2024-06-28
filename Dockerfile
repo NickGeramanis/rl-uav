@@ -5,7 +5,7 @@ WORKDIR /home/catkin_ws/src/rl_uav
 COPY . .
 RUN apt-get update \
     && apt-get upgrade -y \
-    && apt-get install git python3-pip ros-noetic-geographic-msgs -y \
+    && apt-get install git python3-pip ros-noetic-geographic-msgs tightvncserver dbus-x11 xfonts-base -y \
     && pip install -r requirements.txt \
     && cd .. \
     && git clone https://github.com/tu-darmstadt-ros-pkg/hector_quadrotor  \

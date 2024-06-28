@@ -11,6 +11,7 @@ using [ROS](https://www.ros.org/)/[Gazebo](http://gazebosim.org/) and Python.
 - [Getting Started](#getting-started)
     - [Prerequisites](#prerequisites)
     - [Installation](#installation)
+        - [With GUI](#with-gui)
 - [Usage](#usage)
 - [Status](#status)
 - [License](#license)
@@ -88,29 +89,68 @@ docker build -t rl-uav .
 Run the container:
 
 ```bash
-docker run -it rl-uav
+docker run --name rl-uav -it rl-uav
 ```
 
 Due to XmlRpcServer querying all possible file descriptors, it may be required to lower the corresponding limit depending on your system:
 
 ```bash
-docker run --ulimit nofile=1024:524288 -it rl-uav
+docker run --ulimit nofile=1024:524288 --name rl-uav -it rl-uav
 ```
 
 Build the ros package:
 
 ```bash
+source /opt/ros/noetic/setup.bash
 cd /home/catkin_ws
 catkin_make
 ```
 
+Due to the high resource intensity of the catkin_make, it may be required to run only one job at a time.
+
+```bash
+catkin_make -j1
+```
+
+#### With GUI
+
+The above image also contains a vnc server in order to display the gazebo simulation.
+
+First create a docker network:
+
+```bash
+docker network create ros
+```
+
+And then run the container as following:
+
+```bash
+docker run --ulimit nofile=1024:524288 --name rl-uav --net=ros --env="DISPLAY=novnc:0.0" --env="RESOLUTION=1920x1080" --env="USER=root" -it rl-uav
+```
+
+Start the vnc server with the following command:
+
+```bash
+vncserver -geometry $RESOLUTION
+```
+
+Run the noVNC client:
+
+```bash
+docker run -d --rm --net=ros --env="DISPLAY_WIDTH=1920" --env="DISPLAY_HEIGHT=1800" --env="RUN_XTERM=no" --name=novnc -p=8080:8080 theasp/novnc:latest
+```
+
+Connect to novnc using the following url: http://localhost:8080/vnc.html.
+
 ## Usage
 
-In order to launch a new world you must start the `train.launch` file:
+In order to launch a new world you must start the `train.launch` file.
+You can select the desired track by changing the `world` parameter accordingly.
+Moreover, you can choose whether to display the GUI with the `gui` parameter.
 
 ```bash
 source /home/catkin_ws/devel/setup.bash
-roslaunch rl_uav train.launch world:=track1 gui:=false
+roslaunch rl_uav train.launch world:=track1 gui:=true
 ```
 
 After the world has started, run the `train_uav` node (`train_uav.py`) to begin
