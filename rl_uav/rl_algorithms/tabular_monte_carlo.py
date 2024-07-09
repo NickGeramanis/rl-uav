@@ -41,7 +41,7 @@ class TabularMonteCarlo(RLAlgorithm):
             terminated = truncated = False
             state, _ = self._env.reset()
             state = self._discretizer.discretize(state)
-            while not terminated or not truncated:
+            while not terminated and not truncated:
                 if random.random() <= epsilon:
                     action = self._env.action_space.sample()
                 else:
@@ -83,7 +83,7 @@ class TabularMonteCarlo(RLAlgorithm):
             state, _ = self._env.reset()
             terminated = truncated = False
 
-            while not terminated or not truncated:
+            while not terminated and not truncated:
                 state = self._discretizer.discretize(state)
                 action = np.argmax(self._q_table[state])
                 state, reward, terminated, truncated, _ = self._env.step(action)

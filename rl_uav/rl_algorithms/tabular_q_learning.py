@@ -55,7 +55,7 @@ class TabularQLearning(RLAlgorithm):
             observation, _ = self._env.reset()
             current_state = self._discretizer.discretize(observation)
 
-            while not terminated or not truncated:
+            while not terminated and not truncated:
                 if random.random() <= epsilon:
                     action = self._env.action_space.sample()
                 else:

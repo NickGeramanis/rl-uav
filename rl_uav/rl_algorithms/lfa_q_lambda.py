@@ -66,7 +66,7 @@ class LFAQLambda(RLAlgorithm):
             else:
                 current_action = np.argmax(current_q_values)
 
-            while not terminated or not truncated:
+            while not terminated and not truncated:
                 next_state, reward, terminated, truncated, _ = self._env.step(
                     current_action)
                 episode_reward += reward
@@ -119,7 +119,7 @@ class LFAQLambda(RLAlgorithm):
             state, _ = self._env.reset()
             terminated = truncated = False
 
-            while not terminated or not truncated:
+            while not terminated and not truncated:
                 q_values = self._feature_constructor.calculate_q(self._weights,
                                                                  state)
                 action = np.argmax(q_values)

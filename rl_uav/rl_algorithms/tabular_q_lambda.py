@@ -65,7 +65,7 @@ class TabularQLambda(RLAlgorithm):
             else:
                 current_action = np.argmax(self._q_table[current_state])
 
-            while not terminated or not truncated:
+            while not terminated and not truncated:
                 next_state, reward, terminated, truncated, _ = self._env.step(current_action)
                 next_state = self._discretizer.discretize(next_state)
                 episode_reward += reward
@@ -113,7 +113,7 @@ class TabularQLambda(RLAlgorithm):
             state, _ = self._env.reset()
             terminated = truncated = False
 
-            while not terminated or not truncated:
+            while not terminated and not truncated:
                 state = self._discretizer.discretize(state)
                 action = np.argmax(self._q_table[state])
                 state, reward, terminated, truncated, _ = self._env.step(action)

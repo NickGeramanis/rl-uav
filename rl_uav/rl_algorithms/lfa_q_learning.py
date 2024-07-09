@@ -56,7 +56,7 @@ class LFAQLearning(RLAlgorithm):
                 self._weights,
                 current_state)
 
-            while not terminated or not truncated:
+            while not terminated and not truncated:
                 if random.random() <= epsilon:
                     action = self._env.action_space.sample()
                 else:
@@ -93,7 +93,7 @@ class LFAQLearning(RLAlgorithm):
             state, _ = self._env.reset()
             terminated = truncated = False
 
-            while not terminated or not truncated:
+            while not terminated and not truncated:
                 q_values = self._feature_constructor.calculate_q(self._weights,
                                                                  state)
                 action = np.argmax(q_values)

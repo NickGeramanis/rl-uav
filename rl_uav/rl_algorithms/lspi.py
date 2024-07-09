@@ -126,7 +126,7 @@ class LSPI(RLAlgorithm):
             state, _ = self._env.reset()
             terminated = truncated = False
 
-            while not terminated or not truncated:
+            while not terminated and not truncated:
                 q_values = self._feature_constructor.calculate_q(self._weights,
                                                                  state)
                 action = np.argmax(q_values)
