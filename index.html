@@ -92,22 +92,36 @@
     <p>Build the docker image:</p>
     <code>docker build -t rl-uav .</code>
     <p>Run the container:</p>
-    <code>docker run -it rl-uav</code>
+    <code>docker run --name rl-uav -it rl-uav</code>
     <p>Due to XmlRpcServer querying all possible file descriptors, it may be required to lower the corresponding limit depending on your system:</p>
-    <code>docker run --ulimit nofile=1024:524288 -it rl-uav</code>
+    <code>docker run --ulimit nofile=1024:524288 --name rl-uav -it rl-uav</code>
     <p>Build the ros package:</p>
     <code>
+        source /opt/ros/noetic/setup.bash<br>
         cd /home/catkin_ws<br>
         catkin_make
     </code>
+    <p>Due to the high resource intensity of the catkin_make, it may be required to run only one job at a time.</p>
+    <code>catkin_make -j1</code>
+    <h4 id="With GUI">With GUI</h4>
+    <p>The above image also contains a vnc server in order to display the gazebo simulation.</p>
+    <p>First create a docker network:</p>
+    <code>docker network create ros</code>
+    <p>And then run the container as following:</p>
+    <code>docker run --ulimit nofile=1024:524288 --name rl-uav --net=ros --env="DISPLAY=novnc:0.0" --env="RESOLUTION=1920x1080" --env="USER=root" -it rl-uav</code>
+    <p>Start the vnc server with the following command:</p>
+    <code>vncserver -geometry $RESOLUTION</code>
+    <p>Run the noVNC client:</p>
+    <code>docker run -d --rm --net=ros --env="DISPLAY_WIDTH=1920" --env="DISPLAY_HEIGHT=1800" --env="RUN_XTERM=no" --name=novnc -p=8080:8080 theasp/novnc:latest</code>
+    <p>Connect to novnc using the following url: <a href="http://localhost:8080/vnc.html">http://localhost:8080/vnc.html</a>.</p>
     <h3 id="usage">Usage</h3>
-    <p>In order to launch a new world you must start the
-        <quote>train.launch</quote>
-        file:
+    <p>In order to launch a new world you must start the <quote>train.launch</quote> file.
+        You can select the desired track by changing the <quote>world</quote> parameter accordingly.
+        Moreover, you can choose whether to display the GUI with the <quote>gui</quote>  parameter.
     </p>
     <code>
         source /home/catkin_ws/devel/setup.bash<br>
-        roslaunch rl_uav train.launch world:=track1 gui:=false
+        roslaunch rl_uav train.launch world:=track1 gui:=true
     </code>
     <p>
         After the world has started, run the
